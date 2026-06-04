@@ -3,8 +3,8 @@ import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { MainArea } from '@/components/MainArea';
 import { ThemeProvider } from '@/components/Book/ThemeProvider';
+import { ResizeObserverGuard } from '@/components/Book/ResizeObserverGuard';
 import { themeNoFlashScript } from '@/components/Book/theme-config';
-import { book } from '@/lib/book-toc';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -22,8 +22,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: book.title,
-  description: book.subtitle,
+  // Format-neutral default; each page sets its own title/description.
+  title: 'ctzn.pub book-template',
+  description: 'A multi-format publishing starter — book, gallery, and docs layouts.',
 };
 
 export default function RootLayout({
@@ -45,6 +46,7 @@ export default function RootLayout({
         className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} min-h-screen flex flex-col font-sans bg-brand-bg text-brand-text selection:bg-brand-primary/30`}
       >
         <ThemeProvider>
+          <ResizeObserverGuard />
           <MainArea>{children}</MainArea>
         </ThemeProvider>
       </body>

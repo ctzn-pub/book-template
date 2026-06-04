@@ -6,19 +6,20 @@ MDX and embedded Recharts figures, with Distill-style typography and a library
 of editorial layout components (drop caps, callouts, key numbers, side notes,
 pull quotes, small multiples, tab sets, data tables, embeds).
 
-It ships **two worked layouts** you can demo side by side, plus a landing page
+It ships **three worked layouts** you can demo side by side, plus a landing page
 that links to each:
 
 | Format | Route | For |
 | --- | --- | --- |
 | **Book** | `/book` | A sequential, long-form work — parts → chapters → articles, an editorial cover, a chapter TOC drawer, prev/next reading flow. |
 | **Gallery** | `/gallery` | A collection of *independent* articles — a card-grid front page, each piece standalone, back-to-gallery navigation. No sequence. |
-| _Docs_ | _(planned)_ | _An always-open left-sidebar reference layout. Stubbed on the landing page._ |
+| **Docs** | `/docs` | A reference layout — a persistent, always-open left-sidebar of sections and pages, collapsible to a drawer on mobile. The Fumadocs / Docusaurus model. |
 
 Each ships worked, lorem-ipsum examples (the book's
 [`ch01-getting-started`](app/book/ch01-getting-started/article.mdx) tours every
-component; the gallery has two example pieces). Read them, then keep the one
-format you want, delete the rest, and make it your root route.
+component; the gallery has two example pieces; the docs site has a few pages).
+Read them, then keep the one format you want, delete the rest, and make it your
+root route.
 
 ## Quick start
 
@@ -111,31 +112,42 @@ app/
     [slug]/page.tsx       Placeholder for any gallery entry without a page.
     first-piece/          A worked standalone article (page.tsx + article.mdx).
     second-piece/         A second, unrelated standalone article.
+  docs/                ── THE DOCS FORMAT ──
+    page.tsx              Redirects to the first published page.
+    [slug]/page.tsx       Placeholder for any docs entry without a page.
+    introduction/         Worked docs pages (page.tsx + article.mdx) …
+    installation/         … rendered inside the persistent-sidebar shell.
+    writing-pages/
 components/
   MainArea.tsx          The <main> wrapper.
   FormatLanding.tsx     The root "pick a layout" page (Book / Gallery / Docs).
   Book/
     ThemeProvider.tsx   Owns the active theme (CSS attr + VizThemeProvider).
     ThemeSwitcher.tsx   The reader-facing theme picker.
+    ResizeObserverGuard.tsx  Swallows the benign "ResizeObserver loop" warning.
     theme-config.ts     Shared theme constants + the no-flash script string.
-    BookShell.tsx       Article frame — sticky bar + breadcrumb + prev/next.
+    BookShell.tsx       Book article frame — sticky bar + breadcrumb + prev/next.
     BookHome.tsx        Book front page (parts → chapters → articles).
     ChapterTocDrawer.tsx Floating "Contents" pill that opens the TOC.
     Figure.tsx          The Distill-style layout-zone wrapper.
     DropCap, KeyNumber, Callout, SideNote, PullQuote, Quote, Annotation,
     SmallMultiples, TabSet, DataTable, Step, SectionDivider,
-    StaticChartV1, Embed   The article-component library (shared by both formats).
+    StaticChartV1, Embed   The article-component library (shared by all formats).
     charts/
       timeseries-line-v1.tsx   The default chart component (theme-aware).
       timeseries-index-v1.tsx  Indexed (rebased-to-100) variant.
   Gallery/
     GalleryHome.tsx     Gallery front page (card grid).
     GalleryShell.tsx    Gallery article frame (back-to-gallery, no prev/next).
+  Docs/
+    DocsShell.tsx       Docs frame — persistent left sidebar + content column.
 lib/
   book-toc.ts           The book's TOC — parts, chapters, article order.
   book-types.ts         Book TS types (Book, Part, Chapter, Article).
   gallery-toc.ts        The gallery's flat article list.
   gallery-types.ts      Gallery TS types (Gallery, GalleryArticle).
+  docs-toc.ts           The docs sidebar — sections of pages.
+  docs-types.ts         Docs TS types (Docs, DocsSection, DocsPage).
   utils.ts              cn() — clsx + tailwind-merge.
 viz/
   theme/                The chart + article theme system (see above).
@@ -215,6 +227,22 @@ Same idea, flatter. Add an entry to [`lib/gallery-toc.ts`](lib/gallery-toc.ts)
 page wraps the MDX in `<GalleryShell ... basePath="/gallery">`. There are no
 chapters and no prev/next; the front-page grid and a back-to-gallery link are
 the whole navigation.
+
+## Adding a page (Docs format)
+
+Add an entry to [`lib/docs-toc.ts`](lib/docs-toc.ts) under a section
+(`slug`, `title`, `status`) — that's what builds the sidebar — then create
+`app/docs/<slug>/page.tsx` + `article.mdx`, mirroring `introduction`. The page
+resolves the entry and passes it to `<DocsShell page=… prev=… next=…>`. The
+sidebar is generated from the config, the current page is highlighted
+automatically, and `/docs` redirects to the first published page.
+
+> **Why `DocsShell` takes a resolved `page` instead of a lookup function:**
+> it's a Client Component (it owns the mobile-drawer state), and functions
+> can't be passed from a Server Component across that boundary. So the route
+> calls `findDocsPage(slug)` and hands `DocsShell` plain data. (`BookShell` and
+> `GalleryShell` are Server Components, so they can still take a `findArticle`
+> function.)
 
 ## Data shape
 
@@ -339,13 +367,22 @@ usually want **one**. To commit to a format and make it your root:
 3. Replace `app/page.tsx` with the book home, and edit `lib/book-toc.ts`.
 
 **Keep the Gallery, drop the rest**
-1. Delete `app/book/`, `lib/book-toc.ts`, `book.config.mjs`, the `charts/`
-   components you don't use, and `components/FormatLanding.tsx`.
+1. Delete `app/book/`, `app/docs/`, `lib/book-toc.ts`, `lib/docs-*.ts`,
+   `book.config.mjs`, the `charts/` components you don't use, and
+   `components/FormatLanding.tsx`.
 2. Move `app/gallery/*` up to `app/` and pass `basePath=""` to `<GalleryHome>` /
    `<GalleryShell>`; set `homeHref={null}` to drop the "← Formats" link.
 3. Replace `app/page.tsx` with the gallery home, and edit `lib/gallery-toc.ts`.
 
-Or keep the landing page and both formats — it's a fine multi-section site as
+**Keep the Docs, drop the rest**
+1. Delete `app/book/`, `app/gallery/`, `lib/book-toc.ts`, `lib/gallery-*.ts`,
+   `book.config.mjs`, and `components/FormatLanding.tsx`.
+2. Move `app/docs/*` up to `app/` and pass `basePath=""` to `<DocsShell>`;
+   set `homeHref={null}` to drop the "← Formats" link. Point the root
+   `app/page.tsx` at the redirect (`redirect('/' + firstDocsSlug())`).
+3. Edit `lib/docs-toc.ts`.
+
+Or keep the landing page and all three formats — it's a fine multi-section site as
 shipped. The `[slug]` placeholder routes render any TOC/gallery entry that
 doesn't yet have its own `page.tsx`, so you can sketch first and write later.
 

@@ -1,0 +1,32 @@
+import { Callout } from '@/components/Book/Callout';
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is the **Docs**
+layout — a reference format with a persistent left sidebar that's always open on
+desktop. Unlike the Book (a sequential narrative) or the Gallery (independent
+pieces), docs are organized into sections of pages, and the sidebar is the
+primary way to move around.
+
+<Callout variant="finding">
+Use the docs layout for reference material — API docs, handbooks, guides —
+where readers jump around rather than read start-to-finish.
+</Callout>
+
+## How it's structured
+
+The sidebar is generated from `lib/docs-toc.ts`: a list of **sections**, each
+with **pages**. Edit that file to shape your sidebar. Every page is an MDX file
+under `app/docs/<slug>/`, wrapped in `<DocsShell>`.
+
+Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+commodo consequat.
+
+## What you get
+
+- An always-open sidebar on desktop; a slide-in drawer on mobile.
+- The current page highlighted in the sidebar.
+- Optional prev/next links at the foot of each page (in sidebar order).
+- The same components, typography, and five switchable themes as the other
+  formats — try the **Theme** button, top-right.
+
+Head to **Installation** next, or jump anywhere from the sidebar.
