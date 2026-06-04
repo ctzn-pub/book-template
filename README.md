@@ -109,7 +109,7 @@ components/
     Figure.tsx          The Distill-style layout-zone wrapper.
     DropCap, KeyNumber, Callout, SideNote, PullQuote, Quote, Annotation,
     SmallMultiples, TabSet, DataTable, Step, SectionDivider,
-    StaticChartV1      The article-component library.
+    StaticChartV1, Embed   The article-component library.
     charts/
       timeseries-line-v1.tsx   The default chart component (theme-aware).
       timeseries-index-v1.tsx  Indexed (rebased-to-100) variant.
@@ -225,6 +225,26 @@ The chart resolves series colors from the active theme — **don't** hard-code
 hex. Series named with a political identity (`Democrat`/`Republican`,
 `Liberal`/`Conservative`) automatically get that theme's party colors; any
 other names take neutral categorical slots, by position.
+
+## Embedding third-party interactives
+
+To drop in an external interactive — Datawrapper, Observable, Flourish, a
+YouTube/Vimeo clip, a tweet, a CodePen — use `<Embed>` inside a `<Figure>`:
+
+```mdx
+import { Embed } from '@/components/Book/Embed';
+
+<Figure caption="Figure 4. An interactive built in Datawrapper.">
+  <Embed src="https://datawrapper.dwcdn.net/abcde/1/" title="Vote share by state" ratio="4:3" />
+</Figure>
+```
+
+It's responsive (set `ratio` — `16:9` default — or an explicit `height`),
+**lazy-loads** as the reader scrolls to it, is **sandboxed** by default, and
+themes its chrome with the design tokens. YouTube/Vimeo watch URLs are
+normalized to embed form, so you can paste the address-bar URL. For a trusted
+source that breaks under the sandbox, pass `sandbox={false}`. See Figure 4 in
+the starter chapter for a live example.
 
 ## More chart components
 
