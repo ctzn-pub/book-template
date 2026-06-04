@@ -1,0 +1,33 @@
+import { Callout } from '@/components/Book/Callout';
+import { Step } from '@/components/Book/Step';
+
+Get the template running locally in a minute. Lorem ipsum dolor sit amet,
+consectetur adipiscing elit.
+
+<Step number={1} title="Install dependencies">
+Run `pnpm install` at the repo root.
+</Step>
+
+<Step number={2} title="Start the dev server">
+Run `pnpm dev` and open the printed URL. The format landing page lets you jump
+to the book, gallery, or these docs.
+</Step>
+
+<Step number={3} title="Edit and write">
+Change `lib/docs-toc.ts` to shape the sidebar, then write pages under
+`app/docs/<slug>/`.
+</Step>
+
+## Requirements
+
+```bash
+node --version   # 18.18+ (or 20+)
+pnpm --version   # 9+
+```
+
+<Callout variant="caveat">
+This starter ships placeholder content for every format. Keep the one you want
+and delete the rest — see the README's "Picking one format" section.
+</Callout>
+
+Next: **Writing Pages**.

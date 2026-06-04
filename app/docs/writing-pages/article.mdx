@@ -1,0 +1,41 @@
+import { Callout } from '@/components/Book/Callout';
+
+Adding a docs page is two steps: register it in the sidebar, then write the MDX.
+
+## 1. Add it to the sidebar
+
+Edit `lib/docs-toc.ts` and add a page under a section:
+
+```ts
+{
+  title: 'Guides',
+  pages: [
+    { slug: 'writing-pages', title: 'Writing Pages', status: 'published' },
+    { slug: 'my-new-page', title: 'My New Page', status: 'draft' },
+  ],
+},
+```
+
+`status` is `'planned' | 'draft' | 'published'`. Published pages link in the
+sidebar; the others render dimmed. Drafts still resolve via the `[slug]`
+placeholder route, so you can stub the whole sidebar before writing.
+
+## 2. Write the MDX
+
+Create `app/docs/my-new-page/page.tsx` (copy any existing docs page) and an
+`article.mdx` beside it. The page wraps the MDX in `<DocsShell>`:
+
+```tsx
+<DocsShell slug="my-new-page" docs={docs} findPage={findDocsPage} basePath="/docs">
+  <Article />
+</DocsShell>
+```
+
+<Callout variant="finding">
+Every layout component from the library works in a docs page too — callouts,
+figures, tables, charts, embeds. The sidebar is the only thing unique to this
+format.
+</Callout>
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+incididunt ut labore et dolore magna aliqua.

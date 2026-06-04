@@ -42,13 +42,13 @@ const FORMATS: Format[] = [
     status: 'live',
   },
   {
-    href: null,
+    href: '/docs',
     eyebrow: 'Format 03',
     title: 'Docs',
     blurb:
-      'A reference layout with a persistent, always-open left sidebar of contents and a content column beside it — the Fumadocs / Docusaurus reading model. Coming soon.',
+      'A reference layout with a persistent, always-open left sidebar of contents and a content column beside it — the Fumadocs / Docusaurus reading model.',
     bullets: ['Always-open left sidebar', 'Reference reading model', 'Collapsible on mobile'],
-    status: 'planned',
+    status: 'live',
   },
 ];
 
