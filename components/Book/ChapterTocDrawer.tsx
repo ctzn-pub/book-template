@@ -10,6 +10,8 @@ export interface ChapterTocDrawerProps {
   book: Book;
   /** Slug of the article currently being read; highlighted in the TOC. */
   currentSlug: string;
+  /** Route prefix the book lives under (articles link to `${basePath}/${slug}`). Default '/book'. */
+  basePath?: string;
 }
 
 function formatArticleNumber(num: string): string {
@@ -22,7 +24,7 @@ function formatArticleNumber(num: string): string {
  * tree. Current article is highlighted. Esc / outside-click / clicking a
  * link closes the drawer.
  */
-export function ChapterTocDrawer({ book, currentSlug }: ChapterTocDrawerProps) {
+export function ChapterTocDrawer({ book, currentSlug, basePath = '/book' }: ChapterTocDrawerProps) {
   const [open, setOpen] = React.useState(false);
 
   React.useEffect(() => {
@@ -132,7 +134,7 @@ export function ChapterTocDrawer({ book, currentSlug }: ChapterTocDrawerProps) {
                                     </span>
                                     {isLinkable ? (
                                       <Link
-                                        href={`/${article.slug}`}
+                                        href={`${basePath}/${article.slug}`}
                                         onClick={() => setOpen(false)}
                                         className={[
                                           'text-sm leading-snug transition-colors',

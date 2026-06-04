@@ -30,7 +30,7 @@ export default async function BookArticlePage({ params }: Props) {
   }
 
   return (
-    <BookShell slug={slug} book={book} findArticle={findArticle}>
+    <BookShell slug={slug} book={book} findArticle={findArticle} basePath="/book">
       <p className="text-muted italic">
         This article is not yet written. The chapter scaffolding, navigation,
         and design system are ready — the prose will land in a future commit.

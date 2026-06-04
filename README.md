@@ -1,16 +1,24 @@
 # book-template
 
-A Next.js boilerplate for publishing a long-form, data-driven online book —
-multi-part, multi-chapter, multi-article — built from MDX and embedded
-Recharts figures. Distill-style typography, a sticky book bar, a chapter
-table-of-contents drawer, a small library of editorial layout components
-(drop caps, callouts, key numbers, side notes, pull quotes, small multiples,
-tab sets, data tables), and **five switchable visual themes**.
+A Next.js boilerplate for publishing data-driven MDX writing online, in more
+than one **layout format**, with **five switchable visual themes**. Built from
+MDX and embedded Recharts figures, with Distill-style typography and a library
+of editorial layout components (drop caps, callouts, key numbers, side notes,
+pull quotes, small multiples, tab sets, data tables, embeds).
 
-The template ships with **one worked starter chapter** —
-[`app/ch01-getting-started`](app/ch01-getting-started/article.mdx) — that
-demonstrates every component with placeholder (lorem-ipsum) prose and dummy
-chart data. Read it once as a tour, then replace it with your own book.
+It ships **two worked layouts** you can demo side by side, plus a landing page
+that links to each:
+
+| Format | Route | For |
+| --- | --- | --- |
+| **Book** | `/book` | A sequential, long-form work — parts → chapters → articles, an editorial cover, a chapter TOC drawer, prev/next reading flow. |
+| **Gallery** | `/gallery` | A collection of *independent* articles — a card-grid front page, each piece standalone, back-to-gallery navigation. No sequence. |
+| _Docs_ | _(planned)_ | _An always-open left-sidebar reference layout. Stubbed on the landing page._ |
+
+Each ships worked, lorem-ipsum examples (the book's
+[`ch01-getting-started`](app/book/ch01-getting-started/article.mdx) tours every
+component; the gallery has two example pieces). Read them, then keep the one
+format you want, delete the rest, and make it your root route.
 
 ## Quick start
 
@@ -19,9 +27,9 @@ pnpm install
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The book home page is
-the front page; each article lives at `/<slug>`. Use the **Theme** button in
-the top bar to switch visual themes.
+Open [http://localhost:3000](http://localhost:3000) for the format landing page,
+then visit `/book` or `/gallery`. Use the **Theme** button (top-right) to switch
+visual themes.
 
 To build for production:
 
@@ -89,34 +97,45 @@ full guide. To change the **default** theme, pass it to `<ThemeProvider>` in
 ```
 app/
   layout.tsx            Root layout — fonts, ThemeProvider, no-flash script.
-  page.tsx              Front page — renders <BookHome>.
+  page.tsx              Format landing page — renders <FormatLanding>.
   globals.css           Theme token derivation (--color-* from --viz-*) + chrome.
-  [slug]/page.tsx       Fallback route for any TOC entry without a dedicated
-                        page.tsx (renders a placeholder — handy for stubs).
-  ch01-getting-started/ The one worked starter chapter.
-    page.tsx              Imports the MDX, wraps in <BookShell>.
-    article.mdx           Lorem-ipsum tour of every component.
-    data/*.json           Dummy chart data the chapter imports.
+  book/                 ── THE BOOK FORMAT ──
+    page.tsx              Book home — renders <BookHome basePath="/book">.
+    [slug]/page.tsx       Placeholder for any TOC entry without a dedicated page.
+    ch01-getting-started/ The one worked starter chapter.
+      page.tsx              Imports the MDX, wraps in <BookShell basePath="/book">.
+      article.mdx           Lorem-ipsum tour of every component.
+      data/*.json           Dummy chart data the chapter imports.
+  gallery/              ── THE GALLERY FORMAT ──
+    page.tsx              Gallery home — renders <GalleryHome>.
+    [slug]/page.tsx       Placeholder for any gallery entry without a page.
+    first-piece/          A worked standalone article (page.tsx + article.mdx).
+    second-piece/         A second, unrelated standalone article.
 components/
   MainArea.tsx          The <main> wrapper.
+  FormatLanding.tsx     The root "pick a layout" page (Book / Gallery / Docs).
   Book/
     ThemeProvider.tsx   Owns the active theme (CSS attr + VizThemeProvider).
     ThemeSwitcher.tsx   The reader-facing theme picker.
     theme-config.ts     Shared theme constants + the no-flash script string.
-    BookShell.tsx       Sticky book bar + breadcrumb + footer nav.
-    BookHome.tsx        Front-page layout (parts → chapters → articles).
+    BookShell.tsx       Article frame — sticky bar + breadcrumb + prev/next.
+    BookHome.tsx        Book front page (parts → chapters → articles).
     ChapterTocDrawer.tsx Floating "Contents" pill that opens the TOC.
     Figure.tsx          The Distill-style layout-zone wrapper.
     DropCap, KeyNumber, Callout, SideNote, PullQuote, Quote, Annotation,
     SmallMultiples, TabSet, DataTable, Step, SectionDivider,
-    StaticChartV1, Embed   The article-component library.
+    StaticChartV1, Embed   The article-component library (shared by both formats).
     charts/
       timeseries-line-v1.tsx   The default chart component (theme-aware).
       timeseries-index-v1.tsx  Indexed (rebased-to-100) variant.
+  Gallery/
+    GalleryHome.tsx     Gallery front page (card grid).
+    GalleryShell.tsx    Gallery article frame (back-to-gallery, no prev/next).
 lib/
-  book-toc.ts           The book's table of contents — single source of
-                        truth for parts, chapters, article order.
-  book-types.ts         Shared TS types (Book, Part, Chapter, Article).
+  book-toc.ts           The book's TOC — parts, chapters, article order.
+  book-types.ts         Book TS types (Book, Part, Chapter, Article).
+  gallery-toc.ts        The gallery's flat article list.
+  gallery-types.ts      Gallery TS types (Gallery, GalleryArticle).
   utils.ts              cn() — clsx + tailwind-merge.
 viz/
   theme/                The chart + article theme system (see above).
@@ -131,7 +150,7 @@ tailwind.config.ts      Token → CSS-variable mapping (no baked-in colors).
 next.config.ts          Next + MDX wiring.
 ```
 
-## Adding a new chapter
+## Adding a chapter (Book format)
 
 Three steps. None require touching component code.
 
@@ -156,10 +175,10 @@ are linked from the home page; all three render (non-published ones via the
 ### 2. Create the folder
 
 ```bash
-mkdir -p app/ch02-my-article/data
+mkdir -p app/book/ch02-my-article/data
 ```
 
-Add a `page.tsx` mirroring the starter chapter:
+Add a `page.tsx` mirroring the starter chapter (note `basePath="/book"`):
 
 ```tsx
 import type { Metadata } from 'next';
@@ -174,7 +193,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <BookShell slug="ch02-my-article" book={book} findArticle={findArticle}>
+    <BookShell slug="ch02-my-article" book={book} findArticle={findArticle} basePath="/book">
       <Article />
     </BookShell>
   );
@@ -183,10 +202,19 @@ export default function Page() {
 
 ### 3. Write the MDX
 
-Open `app/ch02-my-article/article.mdx` and write. The editorial components
+Open `app/book/ch02-my-article/article.mdx` and write. The editorial components
 are imported per-file; copy the import block from
-[`app/ch01-getting-started/article.mdx`](app/ch01-getting-started/article.mdx),
+[`app/book/ch01-getting-started/article.mdx`](app/book/ch01-getting-started/article.mdx),
 which shows every component in use.
+
+## Adding an article (Gallery format)
+
+Same idea, flatter. Add an entry to [`lib/gallery-toc.ts`](lib/gallery-toc.ts)
+(`slug`, `title`, `blurb`, `status`), then create
+`app/gallery/<slug>/page.tsx` + `article.mdx`, mirroring `first-piece` — the
+page wraps the MDX in `<GalleryShell ... basePath="/gallery">`. There are no
+chapters and no prev/next; the front-page grid and a back-to-gallery link are
+the whole navigation.
 
 ## Data shape
 
@@ -217,7 +245,7 @@ percent, not a proportion). `n_actual`, CI bounds, and `standard_error` are
 optional but enable hover-tooltip detail and the "Show 95% CI" toggle. The
 `demographic` column name (here `Series`) is passed to the chart as the
 `demographic` prop; its values are the `demographicGroups`. See
-`app/ch01-getting-started/data/` for two complete examples.
+`app/book/ch01-getting-started/data/` for two complete examples.
 
 ### Chart colors follow the theme
 
@@ -297,18 +325,32 @@ The `components/Book/` library is opinionated:
 - **Wrap every chart in `<div className="not-prose">`** inside the `<Figure>`,
   so prose styling doesn't leak into the chart.
 
-## Starting clean
+## Picking one format
 
-When you're ready to remove the starter chapter:
+The landing page exists to demo the formats side by side. For a real site you
+usually want **one**. To commit to a format and make it your root:
 
-1. Delete `app/ch01-getting-started/`.
-2. Edit `lib/book-toc.ts` — replace the `book` constant with your outline.
-3. Update the home-page copy in `app/page.tsx`.
+**Keep the Book, drop the rest**
+1. Delete `app/gallery/`, `lib/gallery-toc.ts`, `lib/gallery-types.ts`, and
+   `components/Gallery/`, `components/FormatLanding.tsx`.
+2. Move `app/book/*` up to `app/` (so the book lives at the root), and pass
+   `basePath=""` (or drop the prop) to `<BookHome>` / `<BookShell>` /
+   `<ChapterTocDrawer>` so links resolve at the root.
+3. Replace `app/page.tsx` with the book home, and edit `lib/book-toc.ts`.
 
-The `[slug]` placeholder route renders any TOC entry that doesn't yet have a
-`page.tsx`.
+**Keep the Gallery, drop the rest**
+1. Delete `app/book/`, `lib/book-toc.ts`, `book.config.mjs`, the `charts/`
+   components you don't use, and `components/FormatLanding.tsx`.
+2. Move `app/gallery/*` up to `app/` and pass `basePath=""` to `<GalleryHome>` /
+   `<GalleryShell>`; set `homeHref={null}` to drop the "← Formats" link.
+3. Replace `app/page.tsx` with the gallery home, and edit `lib/gallery-toc.ts`.
+
+Or keep the landing page and both formats — it's a fine multi-section site as
+shipped. The `[slug]` placeholder routes render any TOC/gallery entry that
+doesn't yet have its own `page.tsx`, so you can sketch first and write later.
 
 ## License
 
 MIT for the boilerplate code (components, scaffolding, scripts). The starter
-chapter is placeholder content — replace it with your own work.
+chapters and gallery pieces are placeholder content — replace them with your
+own work.
