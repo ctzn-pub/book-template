@@ -53,7 +53,7 @@ export function ChapterTocDrawer({ book, currentSlug }: ChapterTocDrawerProps) {
         onClick={() => setOpen(true)}
         aria-label="Open table of contents"
         aria-expanded={open}
-        className="fixed bottom-8 right-8 z-40 inline-flex items-center gap-2.5 rounded-full bg-brand-primary px-5 py-3.5 shadow-xl shadow-brand-primary/30 hover:shadow-2xl hover:shadow-brand-primary/40 hover:scale-105 active:scale-95 transition-all text-sm font-semibold text-white book-toc-pill-pulse"
+        className="fixed bottom-8 right-8 z-40 inline-flex items-center gap-2.5 rounded-full bg-brand-primary px-5 py-3.5 shadow-xl shadow-brand-primary/30 hover:shadow-2xl hover:shadow-brand-primary/40 hover:scale-105 active:scale-95 transition-all text-sm font-semibold text-surface book-toc-pill-pulse"
       >
         <List size={18} strokeWidth={2.5} />
         <span>Contents</span>

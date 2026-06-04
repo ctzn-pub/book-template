@@ -4,6 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import type { Book, Part } from '@/lib/book-types';
+import { ThemeSwitcher } from '@/components/Book/ThemeSwitcher';
 
 export interface BookHomeProps {
   book: Book;
@@ -11,7 +12,7 @@ export interface BookHomeProps {
   attribution?: React.ReactNode | null;
 }
 
-const DEFAULT_KICKER = 'A data-driven analysis using the General Social Survey';
+const DEFAULT_KICKER = 'A short, one-line description of your book';
 
 /**
  * Format an article number for display.
@@ -24,24 +25,22 @@ function formatArticleNumber(num: string): string {
 
 const DEFAULT_ATTRIBUTION: React.ReactNode = (
   <>
-    Generated with{' '}
-    <code className="rounded bg-surface px-1 py-0.5 text-[11px]">gss-article</code>,{' '}
-    <code className="rounded bg-surface px-1 py-0.5 text-[11px]">gss-charts</code>
-    , and{' '}
-    <code className="rounded bg-surface px-1 py-0.5 text-[11px]">gss-literature</code>.
+    Built with the{' '}
+    <code className="rounded bg-card px-1 py-0.5 text-[11px]">ctzn.pub</code> book-template.
   </>
 );
 
-// Per-part subtle background tints. Cycles through six warm/cool washes
-// so consecutive Parts feel distinct without clashing with brand.
-const PART_TINTS = [
-  'bg-gradient-to-b from-[#F5F0EB] via-[#FAF7F2] to-[#FFFFFF]',
-  'bg-gradient-to-b from-[#EDF2F7] via-[#F4F8FC] to-[#FFFFFF]',
-  'bg-gradient-to-b from-[#F4EDF2] via-[#FAF5F8] to-[#FFFFFF]',
-  'bg-gradient-to-b from-[#EBF1ED] via-[#F4F8F5] to-[#FFFFFF]',
-  'bg-gradient-to-b from-[#F2EFE8] via-[#F8F6F0] to-[#FFFFFF]',
-  'bg-gradient-to-b from-[#EDEEF3] via-[#F5F6F9] to-[#FFFFFF]',
-];
+// Per-part background washes. Rather than fixed off-white tints (which would
+// blow out on a dark theme), each band is a faint top-down gradient mixed from
+// the active theme's accent + surface, alternating strength by index. On light
+// themes this reads as a subtle warm/cool separation between Parts; on the
+// Bloomberg dark theme it stays a quiet near-surface wash.
+function partTintStyle(index: number): React.CSSProperties {
+  const strength = index % 2 === 0 ? 6 : 3; // percent of accent at the top
+  return {
+    backgroundImage: `linear-gradient(to bottom, color-mix(in srgb, var(--viz-accent) ${strength}%, var(--color-surface)), var(--color-surface) 70%)`,
+  };
+}
 
 export function BookHome({ book, kicker = DEFAULT_KICKER, attribution = DEFAULT_ATTRIBUTION }: BookHomeProps) {
   const publishedCount = book.parts
@@ -54,9 +53,20 @@ export function BookHome({ book, kicker = DEFAULT_KICKER, attribution = DEFAULT_
 
   return (
     <div className="bg-surface text-body">
-      {/* Hero — asymmetric, big-type editorial cover */}
+      {/* Floating theme picker, top-right over the hero. */}
+      <div className="absolute right-4 top-4 z-50 sm:right-6 sm:top-6">
+        <ThemeSwitcher />
+      </div>
+      {/* Hero — asymmetric, big-type editorial cover. The wash is derived from
+          the active theme's surface + accent so it reads on light and dark. */}
       <section className="relative overflow-hidden border-b border-border">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#FAF7F2] via-[#FFFFFF] to-[#EDF2F7] pointer-events-none" />
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage:
+              'linear-gradient(to bottom right, color-mix(in srgb, var(--viz-accent) 7%, var(--color-surface)), var(--color-surface) 55%, color-mix(in srgb, var(--viz-accent) 5%, var(--color-surface)))',
+          }}
+        />
         <div className="relative mx-auto max-w-7xl px-6 lg:px-12 py-24 lg:py-40 grid grid-cols-1 lg:grid-cols-12 gap-12 items-end">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
@@ -98,9 +108,9 @@ export function BookHome({ book, kicker = DEFAULT_KICKER, attribution = DEFAULT_
         </div>
       </section>
 
-      {/* Parts — each is a full-bleed band with a different tint */}
+      {/* Parts — each is a full-bleed band with a faint theme-derived tint */}
       {book.parts.map((part, i) => (
-        <PartBand key={part.numeral} part={part} tintClass={PART_TINTS[i % PART_TINTS.length]} index={i} />
+        <PartBand key={part.numeral} part={part} index={i} />
       ))}
 
       {attribution !== null && (
@@ -114,9 +124,9 @@ export function BookHome({ book, kicker = DEFAULT_KICKER, attribution = DEFAULT_
   );
 }
 
-function PartBand({ part, tintClass, index }: { part: Part; tintClass: string; index: number }) {
+function PartBand({ part, index }: { part: Part; index: number }) {
   return (
-    <section className={`relative ${tintClass} border-b border-border`}>
+    <section className="relative border-b border-border" style={partTintStyle(index)}>
       <div className="mx-auto max-w-7xl px-6 lg:px-12 py-20 lg:py-32">
         <motion.div
           initial={{ opacity: 0, y: 32 }}

@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "fetch-data": "node --env-file=.env scripts/fetch-article-data.mjs"
+    "fetch-data": "node --env-file=.env scripts/fetch-article-data.mjs",
+    "theme:css": "tsx viz/theme/generate-css.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.957.0",
@@ -37,6 +38,7 @@
     "eslint-config-next": "^16.1.1",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
     "typescript": "^5"
   },
   "packageManager": "pnpm@9.0.0"

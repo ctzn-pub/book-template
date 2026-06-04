@@ -12,6 +12,7 @@ import {
     ResponsiveContainer,
     ReferenceLine,
 } from 'recharts';
+import { useVizTheme } from "@/viz/theme/provider";
 
 // --- Type Definitions ---
 //
@@ -72,9 +73,45 @@ interface TimeseriesIndexProps {
     sharedYDomain?: [number, number];
 }
 
-// Same palette as timeseries-line-v1 so a chapter that mixes the two
-// keeps consistent demographic colors.
-const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ff9800', '#9c27b0', '#795548', '#607d8b'];
+// --- Color resolution ---
+// Colors are NOT hard-coded here. They come from the active viz theme
+// (viz/theme), so the same chart re-tones itself when the reader switches
+// between Editorial / Times / FT / Economist / Bloomberg. Mirrors the
+// `groupColor` resolver in timeseries-line-v1 so a chapter that mixes the
+// two keeps consistent demographic colors across every theme.
+//
+// Group names that carry an established political meaning are mapped onto the
+// theme's `party` semantic domain (each theme re-tones Democrat/Republican to
+// match its masthead). Ideology terms mirror the party convention
+// (liberal→Democrat-blue, conservative→Republican-red). Everything else falls
+// back to the theme's neutral categorical ramp, by position.
+const PARTY_DOMAIN_ALIAS: Record<string, string> = {
+    Democrat: 'Democrat',
+    Democrats: 'Democrat',
+    Republican: 'Republican',
+    Republicans: 'Republican',
+    Independent: 'Independent',
+    Other: 'Other',
+    // Ideology mirrors party tonally.
+    Liberal: 'Democrat',
+    Liberals: 'Democrat',
+    Conservative: 'Republican',
+    Conservatives: 'Republican',
+    Moderate: 'Independent',
+    Moderates: 'Independent',
+};
+
+/** Map a (possibly composite) group label onto a party-domain category, or null. */
+function partyCategoryFor(group: string): string | null {
+    if (PARTY_DOMAIN_ALIAS[group]) return PARTY_DOMAIN_ALIAS[group];
+    // Composite labels like "18-34 · Liberal" — match the segment after the
+    // separator so multi-axis charts still inherit the political color.
+    const parts = group.split(/\s*[·•]\s*/);
+    for (let i = parts.length - 1; i >= 0; i--) {
+        if (PARTY_DOMAIN_ALIAS[parts[i]]) return PARTY_DOMAIN_ALIAS[parts[i]];
+    }
+    return null;
+}
 
 // --- Helpers ---
 const generateTicks = (start: number, end: number, interval: number): number[] => {
@@ -101,6 +138,22 @@ export default function TimeseriesIndexV1({
     data, demographicGroups, demographic, defaultVisibleGroups,
     baselineYear, baselineLabel, compact = false, sharedYDomain
 }: TimeseriesIndexProps) {
+    // Active viz theme. With NO <VizThemeProvider> mounted this returns the
+    // `editorial` default, so the chart still renders standalone. `rc` is the
+    // Recharts chrome bundle (grid/axis/tooltip colors, fonts); `colorFor`
+    // resolves series colors through the theme's semantic map.
+    const { rc, colorFor } = useVizTheme();
+
+    // Resolve a series color through the active theme. Political groups map to
+    // the `party` domain; everything else takes a neutral categorical slot by
+    // position (colorFor with a null domain returns the categorical cycle), so
+    // multi-series charts stay legible in every theme.
+    const groupColor = (group: string): string => {
+        const party = partyCategoryFor(group);
+        const idx = demographicGroups.indexOf(group);
+        return colorFor(party ? 'party' : null, party ?? group, idx >= 0 ? idx : 0);
+    };
+
     const [visibleGroups, setVisibleGroups] = useState<Set<string>>(
         new Set(defaultVisibleGroups || demographicGroups)
     );
@@ -110,13 +163,13 @@ export default function TimeseriesIndexV1({
     }, [demographicGroups, defaultVisibleGroups]);
 
     if (!data || !data.dataPoints || !Array.isArray(data.dataPoints) || data.dataPoints.length === 0) {
-        return <div className="p-4 text-center text-gray-500">No data available to display chart.</div>;
+        return <div className="p-4 text-center text-muted">No data available to display chart.</div>;
     }
 
     const processed = data.dataPoints.map(processDataPoint);
     const validYears = processed.map(d => d.year).filter((y): y is number => y !== null);
     if (validYears.length === 0) {
-        return <div className="p-4 text-center text-gray-500">Data contains no valid years.</div>;
+        return <div className="p-4 text-center text-muted">Data contains no valid years.</div>;
     }
 
     const minYear = Math.min(...validYears);
@@ -195,25 +248,27 @@ export default function TimeseriesIndexV1({
         const visible = payload.filter((s: any) => visibleGroups.has(s.name));
         if (visible.length === 0) return null;
         return (
-            <div className="bg-white p-3 border border-gray-300 shadow-lg rounded-md text-sm max-w-xs">
-                <p className="font-semibold mb-2 text-gray-700">{`Year: ${label}`}</p>
+            <div
+                className="p-3 shadow-lg rounded-md text-sm max-w-xs"
+                style={{ background: rc.tooltip.background, border: rc.tooltip.border, color: rc.tooltip.color }}
+            >
+                <p className="font-semibold mb-2" style={{ color: rc.fg }}>{`Year: ${label}`}</p>
                 {visible.map((s: any) => {
-                    const colorIndex = demographicGroups.indexOf(s.name);
-                    const color = colorIndex !== -1 ? COLORS[colorIndex % COLORS.length] : '#8884d8';
+                    const color = groupColor(s.name);
                     const raw = s.payload?.raw;
                     return (
                         <div key={s.name} className="mb-1.5 last:mb-0">
                             <p className="font-medium" style={{ color }}>{s.name}</p>
-                            <p className="text-gray-600" style={{ color }}>
+                            <p style={{ color }}>
                                 {`Index: ${s.value != null ? s.value.toFixed(1) : 'N/A'}`}
                             </p>
                             {raw != null && (
-                                <p className="text-gray-500 text-xs">
+                                <p className="text-xs" style={{ color: rc.muted }}>
                                     {`Raw: ${raw.toFixed(1)}%`}
                                 </p>
                             )}
                             {s.payload?.n_actual && (
-                                <p className="text-gray-500 text-xs">
+                                <p className="text-xs" style={{ color: rc.muted }}>
                                     {`N: ${s.payload.n_actual.toLocaleString()}`}
                                 </p>
                             )}
@@ -227,35 +282,43 @@ export default function TimeseriesIndexV1({
     const subtitle = baselineLabel ?? `Indexed to ${baselineYear} = 100`;
 
     return (
-        <div className={
-            compact
-                ? "w-full p-2"
-                : "w-full bg-white rounded-lg shadow px-4 md:px-6 pt-3 md:pt-4 pb-4 md:pb-5"
-        }>
+        <div
+            className={
+                compact
+                    ? "w-full p-2"
+                    : "w-full rounded-lg shadow px-4 md:px-6 pt-3 md:pt-4 pb-4 md:pb-5"
+            }
+            style={compact ? undefined : { background: rc.surface }}
+        >
             {!compact && (
                 <div className="mb-2">
-                    <h2 className="text-base font-semibold text-gray-800 leading-snug">{data.metadata.title}</h2>
-                    <p className="text-xs text-gray-600 mt-0.5 leading-snug">{subtitle}</p>
-                    {data.metadata.question && <p className="text-xs text-gray-500 italic mt-0.5 leading-snug">{data.metadata.question}</p>}
+                    <h2 className="text-base font-semibold leading-snug" style={{ color: rc.fg, fontFamily: rc.fontTitle }}>{data.metadata.title}</h2>
+                    <p className="text-xs mt-0.5 leading-snug" style={{ color: rc.muted }}>{subtitle}</p>
+                    {data.metadata.question && <p className="text-xs italic mt-0.5 leading-snug" style={{ color: rc.muted }}>{data.metadata.question}</p>}
                 </div>
             )}
 
             <div className={compact ? "h-[200px] md:h-[220px] w-full" : "h-[450px] md:h-[500px] w-full"}>
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart margin={{ top: 20, right: 20, left: 10, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" vertical={false} />
+                        <CartesianGrid
+                            strokeDasharray={rc.grid.strokeDasharray}
+                            stroke={rc.grid.stroke}
+                            vertical={rc.grid.vertical}
+                            horizontal={!rc.grid.hide}
+                        />
 
                         <XAxis
                             dataKey="year" type="number"
                             domain={[minYear, maxYear]}
                             allowDataOverflow={true}
                             ticks={xTicks}
-                            tick={{ fontSize: compact ? 10 : 11, fill: '#666' }}
+                            tick={{ fontSize: compact ? 10 : 11, fill: rc.axisTick.fill, fontFamily: rc.axisTick.fontFamily }}
                             padding={{ left: 10, right: 10 }}
                             tickFormatter={(year) => String(year)}
                             interval={0}
-                            axisLine={{ stroke: '#ccc' }}
-                            tickLine={{ stroke: '#ccc' }}
+                            axisLine={{ stroke: rc.grid.stroke }}
+                            tickLine={{ stroke: rc.grid.stroke }}
                         />
 
                         <YAxis
@@ -263,35 +326,35 @@ export default function TimeseriesIndexV1({
                             domain={yDomain}
                             allowDataOverflow={false}
                             axisLine={false} tickLine={false}
-                            tick={{ fontSize: compact ? 10 : 11, fill: '#666' }}
+                            tick={{ fontSize: compact ? 10 : 11, fill: rc.axisTick.fill, fontFamily: rc.axisTick.fontFamily }}
                             width={compact ? 36 : 50}
                         />
 
                         {/* Reference line at index = 100 (the baseline). Sits
                             behind the data lines so it reads as a guide,
                             not a series. */}
-                        <ReferenceLine y={100} stroke="#999" strokeDasharray="4 2" />
+                        <ReferenceLine y={100} stroke={rc.muted} strokeDasharray="4 2" />
 
-                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#a0a0a0', strokeWidth: 1, strokeDasharray: '3 3' }} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: rc.muted, strokeWidth: 1, strokeDasharray: '3 3' }} />
 
                         {!compact && (
                             <Legend verticalAlign="bottom" align="center" height={40} onClick={handleLegendClick}
                                 iconSize={10} wrapperStyle={{ paddingTop: '10px' }}
                                 formatter={(value) => {
                                     const isVisible = visibleGroups.has(value);
-                                    return (<span style={{ color: isVisible ? '#333' : '#aaa', cursor: 'pointer', marginLeft: '4px', fontSize: '12px' }}>{value}</span>);
+                                    return (<span style={{ color: isVisible ? rc.fg : rc.muted, cursor: 'pointer', marginLeft: '4px', fontSize: '12px', fontFamily: rc.fontBody }}>{value}</span>);
                                 }} />
                         )}
 
                         {indexed.map((group) => {
-                            const color = COLORS[group.colorIndex % COLORS.length];
+                            const color = groupColor(group.name);
                             return (
                                 <Line
                                     key={group.name} type="linear"
                                     data={group.data}
-                                    dataKey="value" name={group.name} stroke={color} strokeWidth={2}
-                                    dot={{ r: 3, fill: color, strokeWidth: 1, stroke: 'white' }}
-                                    activeDot={{ r: 5, strokeWidth: 1, stroke: 'white' }}
+                                    dataKey="value" name={group.name} stroke={color} strokeWidth={rc.stroke}
+                                    dot={{ r: 3, fill: color, strokeWidth: 1, stroke: rc.surface }}
+                                    activeDot={{ r: 5, strokeWidth: 1, stroke: rc.surface }}
                                     hide={!visibleGroups.has(group.name)}
                                     connectNulls={true}
                                     isAnimationActive={false}
@@ -303,8 +366,11 @@ export default function TimeseriesIndexV1({
             </div>
 
             {!compact && (
-                <div className="flex flex-col sm:flex-row justify-between items-center mt-3 sm:mt-1 pt-2 border-t border-gray-200">
-                    <div className="text-xs text-gray-500 text-left order-1 sm:order-none">
+                <div
+                    className="flex flex-col sm:flex-row justify-between items-center mt-3 sm:mt-1 pt-2 border-t"
+                    style={{ borderColor: rc.grid.stroke }}
+                >
+                    <div className="text-xs text-left order-1 sm:order-none" style={{ color: rc.muted }}>
                         Source: {data.metadata.source?.name || 'Not specified'}
                         {data.metadata.observations && ` (${data.metadata.observations.toLocaleString()} Observations)`}
                     </div>

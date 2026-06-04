@@ -24,7 +24,7 @@ export function Step({ number, title, children }: StepProps) {
   return (
     <div className="flex gap-4 my-4 not-prose">
       <div className="flex-shrink-0">
-        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-body text-white text-sm font-semibold tabular-nums">
+        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-body text-surface text-sm font-semibold tabular-nums">
           {number}
         </span>
       </div>

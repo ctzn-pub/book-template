@@ -1,8 +1,14 @@
 import type { Config } from 'tailwindcss';
 import typography from '@tailwindcss/typography';
 
+/**
+ * All colors resolve to CSS custom properties defined in app/globals.css,
+ * which in turn derive from the active viz theme (`--viz-*`, switched by the
+ * `data-viz-theme` attribute). So changing the theme re-tones every class
+ * below — there are no baked-in hex values here.
+ */
 const config: Config = {
-  darkMode: 'class',
+  darkMode: ['class', '[data-viz-theme="bloomberg"]'],
   content: [
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -12,35 +18,36 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          bg: '#FFFFFF',
-          card: '#F8F9FA',
-          cardHover: '#E9ECEF',
-          border: '#DEE2E6',
-          primary: '#0EA5E9',
-          secondary: '#F97316',
-          text: '#1A1A1A',
-          muted: '#6C757D',
-          subtle: '#F1F3F5',
+          bg: 'var(--color-surface)',
+          card: 'var(--color-card)',
+          cardHover: 'var(--color-card-hover)',
+          border: 'var(--color-border)',
+          primary: 'var(--color-link)',
+          secondary: 'var(--color-link-hover)',
+          text: 'var(--color-body)',
+          muted: 'var(--color-muted)',
+          subtle: 'var(--color-subtle-bg)',
         },
-        // Article design tokens — alias to brand palette so the
-        // Distill-style components ("bg-surface", "text-body", etc.)
-        // inherit the brand without per-component rewrites.
-        surface: '#FFFFFF',
-        card: '#F8F9FA',
-        'code-bg': '#F1F3F5',
-        body: '#1A1A1A',
-        subtle: '#374151',
-        muted: '#6C757D',
-        link: '#0EA5E9',
-        'link-hover': '#0284C7',
+        // Article design tokens — the Distill-style components read these
+        // ("bg-surface", "text-body", "text-muted", "border-border", …).
+        surface: 'var(--color-surface)',
+        card: 'var(--color-card)',
+        'code-bg': 'var(--color-code-bg)',
+        body: 'var(--color-body)',
+        subtle: 'var(--color-subtle)',
+        muted: 'var(--color-muted)',
+        link: 'var(--color-link)',
+        'link-hover': 'var(--color-link-hover)',
         border: {
-          DEFAULT: '#DEE2E6',
-          strong: '#9CA3AF',
+          DEFAULT: 'var(--color-border)',
+          strong: 'var(--color-border-strong)',
         },
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'sans-serif'],
-        display: ['var(--font-space-grotesk)', 'sans-serif'],
+        // The webfont is always loaded (next/font sets --font-inter etc.);
+        // the theme decides which stack to prefer via --font-book-*.
+        sans: ['var(--font-book-sans)', 'var(--font-inter)', 'sans-serif'],
+        display: ['var(--font-book-display)', 'var(--font-space-grotesk)', 'sans-serif'],
         mono: ['var(--font-jetbrains-mono)', 'monospace'],
       },
       animation: {
@@ -54,6 +61,28 @@ const config: Config = {
       },
       transitionTimingFunction: {
         spring: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+      },
+      typography: {
+        // Flip the default `prose` (and `prose-neutral`) palette to the tokens
+        // so MDX body copy re-tones with the theme.
+        DEFAULT: {
+          css: {
+            '--tw-prose-body': 'var(--color-subtle)',
+            '--tw-prose-headings': 'var(--color-body)',
+            '--tw-prose-lead': 'var(--color-subtle)',
+            '--tw-prose-links': 'var(--color-link)',
+            '--tw-prose-bold': 'var(--color-body)',
+            '--tw-prose-counters': 'var(--color-muted)',
+            '--tw-prose-bullets': 'var(--color-border-strong)',
+            '--tw-prose-hr': 'var(--color-border)',
+            '--tw-prose-quotes': 'var(--color-subtle)',
+            '--tw-prose-quote-borders': 'var(--color-border-strong)',
+            '--tw-prose-captions': 'var(--color-muted)',
+            '--tw-prose-code': 'var(--color-body)',
+            '--tw-prose-th-borders': 'var(--color-border-strong)',
+            '--tw-prose-td-borders': 'var(--color-border)',
+          },
+        },
       },
     },
   },

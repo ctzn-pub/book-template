@@ -2,6 +2,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import type { Article, Book, ArticleLookup } from '@/lib/book-types';
 import { ChapterTocDrawer } from '@/components/Book/ChapterTocDrawer';
+import { ThemeSwitcher } from '@/components/Book/ThemeSwitcher';
 
 export interface BookShellProps {
   slug: string;
@@ -86,7 +87,10 @@ function StickyBookBar({ title, subtitle }: { title: string; subtitle: string })
         >
           {title}
         </Link>
-        <span className="hidden sm:block text-xs text-muted">{subtitle}</span>
+        <div className="flex items-center gap-4">
+          <span className="hidden sm:block text-xs text-muted">{subtitle}</span>
+          <ThemeSwitcher />
+        </div>
       </div>
     </div>
   );

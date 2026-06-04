@@ -16,7 +16,7 @@ export interface DataTableColumn<R> {
 export interface DataTableProps<R extends Record<string, unknown>> {
   /**
    * Caption rendered above the table, styled like a figcaption (italic,
-   * sm, gray-600). Should state a finding, not describe the table.
+   * sm, subtle). Should state a finding, not describe the table.
    *
    *   ✓ "Table 1. Republican support fell on 5 of 7 abortion items between 1977 and 2024."
    *   ✗ "Table 1. Abortion items by party."
@@ -144,7 +144,7 @@ export function DeltaCell({ value, suffix = '' }: { value: number; suffix?: stri
   const sign = value > 0 ? '+' : '−';
   const abs = Math.abs(value);
   const arrow = value > 0 ? '↑' : '↓';
-  const color = value > 0 ? 'text-gray-900' : 'text-gray-900';
+  const color = value > 0 ? 'text-body' : 'text-body';
   // Direction-of-change color is the caller's job (via cellClass), since
   // "up" doesn't always mean "good." Here we just render the arrow + sign.
   return (

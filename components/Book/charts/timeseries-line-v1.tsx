@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import { Label } from "@/viz/ui/label";
 import { Switch } from "@/viz/ui/switch";
+import { useVizTheme } from "@/viz/theme/provider";
 
 // --- Type Definitions ---
 interface DataPoint {
@@ -102,42 +103,44 @@ interface TimeTrendDemoChartProps {
     sharedYDomain?: [number, number];
 }
 
-// --- Constants ---
-// Positional fallback palette — used for series whose group name has no
-// established editorial color convention.
-const COLORS = ['#2196f3', '#f44336', '#4caf50', '#ff9800', '#9c27b0', '#795548', '#607d8b'];
-
-// Identity-coded color map. When a demographic group's name matches a key
-// here, use this color instead of the positional fallback. This keeps party
-// charts always-blue-Democrat / always-red-Republican etc., regardless of
-// the order they appear in `demographicGroups`. Add to this map carefully:
-// every entry is an editorial commitment to a color convention.
-const GROUP_COLORS: Record<string, string> = {
-    // Political party (American convention)
-    Democrat: '#2563EB',     // blue-600
-    Democrats: '#2563EB',
-    Republican: '#DC2626',   // red-600
-    Republicans: '#DC2626',
-    Independent: '#6B7280',  // gray-500
-    Other: '#9CA3AF',        // gray-400 (also "Other" parties, "Other" race)
-    // Political ideology (mirrors party convention: liberal=blue, conservative=red)
-    Liberal: '#2563EB',      // blue-600
-    Liberals: '#2563EB',
-    Conservative: '#DC2626', // red-600
-    Conservatives: '#DC2626',
-    Moderate: '#6B7280',     // gray-500
-    Moderates: '#6B7280',
+// --- Color resolution ---
+// Colors are NOT hard-coded here. They come from the active viz theme
+// (viz/theme), so the same chart re-tones itself when the reader switches
+// between Editorial / Times / FT / Economist / Bloomberg. See
+// `useGroupColor` below, which binds the theme's `colorFor` / `colorScale`
+// resolvers to a group name.
+//
+// Group names that carry an established political meaning are mapped onto the
+// theme's `party` semantic domain (each theme re-tones Democrat/Republican to
+// match its masthead). Ideology terms mirror the party convention
+// (liberal→Democrat-blue, conservative→Republican-red). Everything else falls
+// back to the theme's neutral categorical ramp, by position.
+const PARTY_DOMAIN_ALIAS: Record<string, string> = {
+    Democrat: 'Democrat',
+    Democrats: 'Democrat',
+    Republican: 'Republican',
+    Republicans: 'Republican',
+    Independent: 'Independent',
+    Other: 'Other',
+    // Ideology mirrors party tonally.
+    Liberal: 'Democrat',
+    Liberals: 'Democrat',
+    Conservative: 'Republican',
+    Conservatives: 'Republican',
+    Moderate: 'Independent',
+    Moderates: 'Independent',
 };
 
-function colorForGroup(group: string, indexInGroups: number): string {
-    if (GROUP_COLORS[group]) return GROUP_COLORS[group];
+/** Map a (possibly composite) group label onto a party-domain category, or null. */
+function partyCategoryFor(group: string): string | null {
+    if (PARTY_DOMAIN_ALIAS[group]) return PARTY_DOMAIN_ALIAS[group];
     // Composite labels like "18-34 · Liberal" — match the segment after the
-    // separator so multi-axis charts still inherit the editorial color.
+    // separator so multi-axis charts still inherit the political color.
     const parts = group.split(/\s*[·•]\s*/);
     for (let i = parts.length - 1; i >= 0; i--) {
-        if (GROUP_COLORS[parts[i]]) return GROUP_COLORS[parts[i]];
+        if (PARTY_DOMAIN_ALIAS[parts[i]]) return PARTY_DOMAIN_ALIAS[parts[i]];
     }
-    return COLORS[indexInGroups % COLORS.length];
+    return null;
 }
 const presidentialTerms = [
     { start: 1971, end: 1976, party: "Republican", president: "Nixon/Ford" },
@@ -177,6 +180,22 @@ export default function TimeTrendDemoChart({
 }: TimeTrendDemoChartProps) {
     // `compact={true}` is shorthand for the smallest mode (used by SmallMultiples).
     const effectiveDensity = compact ? 'compact' : density;
+
+    // Active viz theme. With NO <VizThemeProvider> mounted this returns the
+    // `editorial` default, so the chart still renders standalone. `rc` is the
+    // Recharts chrome bundle (grid/axis/tooltip colors, fonts); `colorFor`
+    // resolves series colors through the theme's semantic map.
+    const { rc, colorFor } = useVizTheme();
+
+    // Resolve a series color through the active theme. Political groups map to
+    // the `party` domain; everything else takes a neutral categorical slot by
+    // position (colorFor with a null domain returns the categorical cycle), so
+    // multi-series charts stay legible in every theme.
+    const groupColor = (group: string): string => {
+        const party = partyCategoryFor(group);
+        const idx = demographicGroups.indexOf(group);
+        return colorFor(party ? 'party' : null, party ?? group, idx >= 0 ? idx : 0);
+    };
 
     // Lazy init so we don't allocate a fresh Set on every render. The init
     // arg is read once on mount; afterwards state flows from setVisibleGroups.
@@ -329,11 +348,13 @@ export default function TimeTrendDemoChart({
         const prefix = (typeof valueMetadata?.value_prefix === 'string') ? valueMetadata.value_prefix : '';
 
         return (
-            <div className="bg-white p-3 border border-gray-300 shadow-lg rounded-md text-sm max-w-xs">
-                <p className="font-semibold mb-2 text-gray-700">{`Year: ${label}`}</p>
+            <div
+                className="p-3 shadow-lg rounded-md text-sm max-w-xs"
+                style={{ background: rc.tooltip.background, border: rc.tooltip.border, color: rc.tooltip.color }}
+            >
+                <p className="font-semibold mb-2" style={{ color: rc.fg }}>{`Year: ${label}`}</p>
                 {visiblePayload.map((series) => {
-                    const colorIndex = demographicGroups.indexOf(series.name);
-                    const color = colorIndex !== -1 ? colorForGroup(series.name, colorIndex) : series.color || '#8884d8';
+                    const color = groupColor(series.name);
                     const pointData = series.payload;
                     return (
                         <div key={series.name} className="mb-1.5 last:mb-0">
@@ -342,12 +363,12 @@ export default function TimeTrendDemoChart({
                                 {`Value: ${series.value != null ? `${prefix}${series.value.toFixed(1)}${suffix}` : 'N/A'}`}
                             </p>
                             {pointData?.ci_lower !== undefined && pointData?.ci_upper !== undefined && (
-                                <p className="text-gray-500 text-xs">
+                                <p className="text-xs" style={{ color: rc.muted }}>
                                     {`95% CI: [${pointData.ci_lower.toFixed(1)}%, ${pointData.ci_upper.toFixed(1)}%]`}
                                 </p>
                             )}
                             {pointData?.n_actual && (
-                                <p className="text-gray-500 text-xs">
+                                <p className="text-xs" style={{ color: rc.muted }}>
                                     {`N: ${pointData.n_actual.toLocaleString()}`}
                                 </p>
                             )}
@@ -359,16 +380,19 @@ export default function TimeTrendDemoChart({
     };
 
     return (
-        <div className={
-            compact
-                ? "w-full p-2"
-                : `w-full bg-white rounded-lg shadow px-4 md:px-6 pt-3 md:pt-4 pb-4 md:pb-5`
-        }>
+        <div
+            className={
+                compact
+                    ? "w-full p-2"
+                    : `w-full rounded-lg shadow px-4 md:px-6 pt-3 md:pt-4 pb-4 md:pb-5`
+            }
+            style={compact ? undefined : { background: rc.surface }}
+        >
             {!compact && (
                 <div className="mb-2">
-                    <h2 className="text-base font-semibold text-gray-800 leading-snug">{data.metadata.title}</h2>
-                    {data.metadata.subtitle && <p className="text-xs text-gray-600 mt-0.5 leading-snug">{data.metadata.subtitle}</p>}
-                    {data.metadata.question && <p className="text-xs text-gray-500 italic mt-0.5 leading-snug">{data.metadata.question}</p>}
+                    <h2 className="text-base font-semibold leading-snug" style={{ color: rc.fg, fontFamily: rc.fontTitle }}>{data.metadata.title}</h2>
+                    {data.metadata.subtitle && <p className="text-xs mt-0.5 leading-snug" style={{ color: rc.muted }}>{data.metadata.subtitle}</p>}
+                    {data.metadata.question && <p className="text-xs italic mt-0.5 leading-snug" style={{ color: rc.muted }}>{data.metadata.question}</p>}
                 </div>
             )}
 
@@ -388,23 +412,28 @@ export default function TimeTrendDemoChart({
                     >
                         {!compact && relevantPresidentialTerms.map((term, index) => (
                             <ReferenceArea key={`term-bg-${index}`} x1={term.start} x2={term.end} yAxisId="left"
-                                fill={term.party === "Democrat" ? "rgba(230, 240, 255, 0.5)" : "rgba(255, 235, 238, 0.5)"}
+                                fill={groupColor(term.party)} fillOpacity={0.07}
                                 ifOverflow="visible" shapeRendering="crispEdges" />
                         ))}
 
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" vertical={false} />
+                        <CartesianGrid
+                            strokeDasharray={rc.grid.strokeDasharray}
+                            stroke={rc.grid.stroke}
+                            vertical={rc.grid.vertical}
+                            horizontal={!rc.grid.hide}
+                        />
 
                         <XAxis
                             dataKey="year" type="number"
                             domain={[xAxisMin, xAxisMax]}
                             allowDataOverflow={true}
                             ticks={xAxisTicks}
-                            tick={{ fontSize: compact ? 10 : 11, fill: '#666' }}
+                            tick={{ fontSize: compact ? 10 : 11, fill: rc.axisTick.fill, fontFamily: rc.axisTick.fontFamily }}
                             padding={{ left: 10, right: 10 }}
                             tickFormatter={(year) => String(year)}
                             interval={0}
-                            axisLine={{ stroke: '#ccc' }}
-                            tickLine={{ stroke: '#ccc' }}
+                            axisLine={{ stroke: rc.grid.stroke }}
+                            tickLine={{ stroke: rc.grid.stroke }}
                         />
 
                         <YAxis
@@ -413,31 +442,30 @@ export default function TimeTrendDemoChart({
                             domain={yDomain}
                             allowDataOverflow={false}
                             axisLine={false} tickLine={false}
-                            tick={{ fontSize: compact ? 10 : 11, fill: '#666' }}
+                            tick={{ fontSize: compact ? 10 : 11, fill: rc.axisTick.fill, fontFamily: rc.axisTick.fontFamily }}
                             width={compact ? 36 : 50}
                         />
 
-                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#a0a0a0', strokeWidth: 1, strokeDasharray: '3 3' }} />
+                        <Tooltip content={<CustomTooltip />} cursor={{ stroke: rc.muted, strokeWidth: 1, strokeDasharray: '3 3' }} />
 
                         {!compact && (
                             <Legend verticalAlign="bottom" align="center" height={40} onClick={handleLegendClick}
                                 iconSize={10} wrapperStyle={{ paddingTop: '10px' }}
                                 formatter={(value) => {
                                     const isVisible = visibleGroups.has(value);
-                                    return (<span style={{ color: isVisible ? '#333' : '#aaa', cursor: 'pointer', marginLeft: '4px', fontSize: '12px' }}>{value}</span>);
+                                    return (<span style={{ color: isVisible ? rc.fg : rc.muted, cursor: 'pointer', marginLeft: '4px', fontSize: '12px', fontFamily: rc.fontBody }}>{value}</span>);
                                 }} />
                         )}
 
                         {groupedData.map((group) => {
-                            const colorIndex = demographicGroups.indexOf(group.name);
-                            const color = colorIndex !== -1 ? colorForGroup(group.name, colorIndex) : '#8884d8';
+                            const color = groupColor(group.name);
                             return (
                                 <Line
                                     key={group.name} yAxisId="left" type="linear"
                                     data={group.data}
-                                    dataKey="value" name={group.name} stroke={color} strokeWidth={2}
-                                    dot={{ r: 3, fill: color, strokeWidth: 1, stroke: 'white' }}
-                                    activeDot={{ r: 5, strokeWidth: 1, stroke: 'white' }}
+                                    dataKey="value" name={group.name} stroke={color} strokeWidth={rc.stroke}
+                                    dot={{ r: 3, fill: color, strokeWidth: 1, stroke: rc.surface }}
+                                    activeDot={{ r: 5, strokeWidth: 1, stroke: rc.surface }}
                                     hide={!visibleGroups.has(group.name)}
                                     connectNulls={true}
                                     isAnimationActive={false}
@@ -460,7 +488,7 @@ export default function TimeTrendDemoChart({
                                 y={typeof yDomain[1] === 'number' ? yDomain[1] - 3 : 97}
                                 textAnchor="middle"
                                 verticalAnchor="start"
-                                fill="#6b7280"
+                                fill={rc.muted}
                                 fontSize={10}
                             >
                                 {term.president}
@@ -472,8 +500,11 @@ export default function TimeTrendDemoChart({
             </div>
 
             {!compact && (
-                <div className="flex flex-col sm:flex-row justify-between items-center mt-3 sm:mt-1 pt-2 border-t border-gray-200">
-                    <div className="text-xs text-gray-500 text-left order-1 sm:order-none">
+                <div
+                    className="flex flex-col sm:flex-row justify-between items-center mt-3 sm:mt-1 pt-2 border-t"
+                    style={{ borderColor: rc.grid.stroke }}
+                >
+                    <div className="text-xs text-left order-1 sm:order-none" style={{ color: rc.muted }}>
                         Source: {data.metadata.source?.name || 'Not specified'}
                         {data.metadata.observations && ` (${data.metadata.observations.toLocaleString()} Observations)`}
                     </div>
@@ -483,7 +514,7 @@ export default function TimeTrendDemoChart({
                             id="show-ci" checked={showCI} onCheckedChange={setShowCI}
                             disabled={!hasCIData}
                         />
-                        <Label htmlFor="show-ci" className={`text-xs ${!hasCIData ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <Label htmlFor="show-ci" className="text-xs" style={{ color: rc.muted, opacity: hasCIData ? 1 : 0.6 }}>
                             Show 95% CI
                         </Label>
                     </div>
