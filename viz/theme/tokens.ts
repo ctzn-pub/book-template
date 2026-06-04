@@ -114,6 +114,42 @@ export const tokens = {
     // Diverging = bright magenta -> mid grey (so it's distinguishable from
     // the black surface) -> bright cyan. Saturated endpoints.
     bloombergDiverg:['#FF6FAF', '#C97A99', '#3F3F46', '#7AB4D0', '#00D0FF'],
+
+    // ── Slate (dark-editorial) — a clean, neutral dark mode (not Bloomberg's
+    //    amber terminal). Near-black surface, off-white ink, a calm blue accent.
+    slateBg:    '#0e1116',  // near-black with a faint cool cast
+    slateCard:  '#161b22',
+    slateInk:   '#e6edf3',  // off-white
+    slateMuted: '#8b949e',
+    slateLine:  '#262c36',
+    slateAccent:'#58a6ff',  // calm sky-blue
+    slateDem:   '#58a6ff',
+    slateRep:   '#f85149',
+    slateRamp:  ['#0d1f33', '#15406b', '#1f6feb', '#58a6ff', '#a5d6ff'],
+    slateDiverg:['#f85149', '#d98a86', '#30363d', '#79b8e8', '#58a6ff'],
+
+    // ── Brutalist — monospace everything, pure black ink on stark white, one
+    //    hot accent, no soft greys. Grid is solid and present.
+    brutalBg:    '#ffffff',
+    brutalInk:   '#000000',
+    brutalMuted: '#444444',
+    brutalLine:  '#000000',  // hard black rules
+    brutalAccent:'#1a1aff',  // electric blue
+    brutalRed:   '#ff2200',
+    brutalRamp:  ['#e6e6ff', '#9999ff', '#4d4dff', '#1a1aff', '#0000b3'],
+    brutalDiverg:['#ff2200', '#ff8866', '#dddddd', '#6666ff', '#1a1aff'],
+
+    // ── Academic — warm paper, serif body + headings, restrained ink, a muted
+    //    scholarly accent. Tight, footnote-forward.
+    academicBg:    '#fbfaf7',  // warm off-white paper
+    academicInk:   '#1f1b16',  // warm near-black
+    academicMuted: '#6b645a',
+    academicLine:  '#e4ded3',
+    academicAccent:'#7a1f1f',  // deep maroon (journal-cover red)
+    academicDem:   '#2b4a6f',
+    academicRep:   '#7a1f1f',
+    academicRamp:  ['#f0ece3', '#cbb9a0', '#a07d52', '#6b4a2a', '#3d2a16'],
+    academicDiverg:['#7a1f1f', '#bf8a7a', '#f0ece3', '#7d99b4', '#2b4a6f'],
   },
   font: {
     sans:  'Geist, system-ui, sans-serif',
@@ -127,6 +163,11 @@ export const tokens = {
     econSans:   '"Helvetica Neue", Inter, Arial, sans-serif',  // close to Officina Sans
     econSerif:  'Georgia, "Source Serif Pro", serif',
     bloombergSans: '"Helvetica Neue", Inter, system-ui, sans-serif',
+    // dark-editorial reuses the clean Geist sans (set per-theme below).
+    // Brutalist: monospace for *everything* — body and headings.
+    brutalMono: '"Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace',
+    // Academic: serif body + serif headings.
+    academicSerif: 'Georgia, "Source Serif Pro", "Times New Roman", serif',
   },
   size: {
     axisTick:   12,

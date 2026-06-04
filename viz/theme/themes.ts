@@ -219,7 +219,122 @@ export const bloomberg: Theme = build(
   },
 );
 
+// ─── Slate — clean dark-editorial ───────────────────────────────────────────
+// A neutral, calm dark mode (unlike Bloomberg's amber terminal). Near-black
+// cool surface, off-white ink, a single sky-blue accent. The "dark mode most
+// people actually want."
+export const slate: Theme = build(
+  {
+    name: 'slate',
+    mode: 'dark',
+    fg:      t.palette.slateInk,
+    muted:   t.palette.slateMuted,
+    grid:    t.palette.slateLine,
+    surface: t.palette.slateBg,
+    border:  t.palette.slateLine,
+    fontBody:  t.font.sans,
+    fontTitle: t.font.sans,
+    stroke:  t.stroke.regular,
+    gridStyle: 'dashed',
+    gridVertical: false,
+    accent:  t.palette.slateAccent,
+  },
+  {
+    party: {
+      Democrat:    t.palette.slateDem,
+      Republican:  t.palette.slateRep,
+      Independent: t.palette.slateMuted,
+      Other:       t.palette.slateMuted,
+    },
+    categorical: [
+      t.palette.slateAccent,
+      t.palette.slateRep,
+      t.palette.slateInk,
+      t.palette.slateMuted,
+      t.palette.cyan,
+    ],
+    sequential: [...t.palette.slateRamp],
+    diverging:  [...t.palette.slateDiverg],
+  },
+);
+
+// ─── Brutalist — monospace, hard rules, one hot accent ───────────────────────
+// Pure black ink on stark white, monospace everywhere, solid black gridlines,
+// thick strokes, electric-blue accent. Opinionated and loud.
+export const brutalist: Theme = build(
+  {
+    name: 'brutalist',
+    mode: 'light',
+    fg:      t.palette.brutalInk,
+    muted:   t.palette.brutalMuted,
+    grid:    t.palette.brutalLine,
+    surface: t.palette.brutalBg,
+    border:  t.palette.brutalLine,
+    fontBody:  t.font.brutalMono,
+    fontTitle: t.font.brutalMono,
+    stroke:  t.stroke.thick,
+    gridStyle: 'solid',
+    gridVertical: true,
+    accent:  t.palette.brutalAccent,
+  },
+  {
+    party: {
+      Democrat:    t.palette.brutalAccent,
+      Republican:  t.palette.brutalRed,
+      Independent: t.palette.brutalMuted,
+      Other:       t.palette.brutalInk,
+    },
+    categorical: [
+      t.palette.brutalInk,
+      t.palette.brutalAccent,
+      t.palette.brutalRed,
+      t.palette.brutalMuted,
+      t.palette.green,
+    ],
+    sequential: [...t.palette.brutalRamp],
+    diverging:  [...t.palette.brutalDiverg],
+  },
+);
+
+// ─── Academic — warm paper, serif throughout ─────────────────────────────────
+// Serif body AND headings on warm off-white paper, a deep-maroon scholarly
+// accent, thin strokes, faint solid grid. Reads like a journal.
+export const academic: Theme = build(
+  {
+    name: 'academic',
+    mode: 'light',
+    fg:      t.palette.academicInk,
+    muted:   t.palette.academicMuted,
+    grid:    t.palette.academicLine,
+    surface: t.palette.academicBg,
+    border:  t.palette.academicLine,
+    fontBody:  t.font.academicSerif,
+    fontTitle: t.font.academicSerif,
+    stroke:  t.stroke.thin,
+    gridStyle: 'solid',
+    gridVertical: false,
+    accent:  t.palette.academicAccent,
+  },
+  {
+    party: {
+      Democrat:    t.palette.academicDem,
+      Republican:  t.palette.academicRep,
+      Independent: t.palette.academicMuted,
+      Other:       t.palette.academicMuted,
+    },
+    categorical: [
+      t.palette.academicInk,
+      t.palette.academicRep,
+      t.palette.academicDem,
+      t.palette.academicMuted,
+      t.palette.academicAccent,
+    ],
+    sequential: [...t.palette.academicRamp],
+    diverging:  [...t.palette.academicDiverg],
+  },
+);
+
 // ─── The registry ───────────────────────────────────────────────────────────
-export const themes = { editorial, times, ft, economist, bloomberg } as const;
+export const themes = { editorial, times, ft, economist, bloomberg, slate, brutalist, academic } as const;
 export type ThemeName = keyof typeof themes;
 export const defaultTheme = editorial;
