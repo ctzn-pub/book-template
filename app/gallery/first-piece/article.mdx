@@ -1,0 +1,42 @@
+import { DropCap } from '@/components/Book/DropCap';
+import { Callout } from '@/components/Book/Callout';
+import { PullQuote } from '@/components/Book/PullQuote';
+import { SideNote } from '@/components/Book/SideNote';
+
+<DropCap>
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is an example
+**gallery article**. Unlike a chapter in the Book format, it has no “next” — it
+stands on its own, and the only navigation is back to the gallery. The same
+editorial components are available here as in the book; use whichever fit.
+
+</DropCap>
+
+Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit
+esse cillum dolore.
+
+<Callout variant="finding">
+A gallery is the right format when your pieces are **independent** — essays,
+notes, case studies — rather than a single argument unfolding across chapters.
+</Callout>
+
+## A section like any other
+
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia
+deserunt mollit anim id est laborum. <SideNote label="Note">Side notes,
+callouts, figures, charts, embeds — everything from the component library works
+in a gallery article too.</SideNote> Curabitur pretium tincidunt lacus.
+
+<PullQuote>
+Same components, same themes — a different shape for the front page.
+</PullQuote>
+
+Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros
+bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu
+nibh euismod gravida.
+
+To write your own, edit `lib/gallery-toc.ts` and add an
+`app/gallery/<slug>/` folder with a `page.tsx` and this `article.mdx`. Delete
+these examples when you don't need them.

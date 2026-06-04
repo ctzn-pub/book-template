@@ -10,6 +10,8 @@ export interface BookHomeProps {
   book: Book;
   kicker?: string | null;
   attribution?: React.ReactNode | null;
+  /** Route prefix the book lives under; article links resolve to `${basePath}/${slug}`. Default '/book'. */
+  basePath?: string;
 }
 
 const DEFAULT_KICKER = 'A short, one-line description of your book';
@@ -42,7 +44,7 @@ function partTintStyle(index: number): React.CSSProperties {
   };
 }
 
-export function BookHome({ book, kicker = DEFAULT_KICKER, attribution = DEFAULT_ATTRIBUTION }: BookHomeProps) {
+export function BookHome({ book, kicker = DEFAULT_KICKER, attribution = DEFAULT_ATTRIBUTION, basePath = '/book' }: BookHomeProps) {
   const publishedCount = book.parts
     .flatMap(p => p.chapters)
     .flatMap(c => c.articles)
@@ -110,7 +112,7 @@ export function BookHome({ book, kicker = DEFAULT_KICKER, attribution = DEFAULT_
 
       {/* Parts — each is a full-bleed band with a faint theme-derived tint */}
       {book.parts.map((part, i) => (
-        <PartBand key={part.numeral} part={part} index={i} />
+        <PartBand key={part.numeral} part={part} index={i} basePath={basePath} />
       ))}
 
       {attribution !== null && (
@@ -124,7 +126,7 @@ export function BookHome({ book, kicker = DEFAULT_KICKER, attribution = DEFAULT_
   );
 }
 
-function PartBand({ part, index }: { part: Part; index: number }) {
+function PartBand({ part, index, basePath }: { part: Part; index: number; basePath: string }) {
   return (
     <section className="relative border-b border-border" style={partTintStyle(index)}>
       <div className="mx-auto max-w-7xl px-6 lg:px-12 py-20 lg:py-32">
@@ -173,7 +175,7 @@ function PartBand({ part, index }: { part: Part; index: number }) {
                     {isCollapsed && onlyArticle ? (
                       onlyArticle.status === 'published' ? (
                         <Link
-                          href={`/${onlyArticle.slug}`}
+                          href={`${basePath}/${onlyArticle.slug}`}
                           className="font-display font-semibold text-body text-xl lg:text-2xl leading-tight hover:text-link transition-colors group inline-flex items-baseline gap-2"
                         >
                           <span>{chapter.title}</span>
@@ -203,7 +205,7 @@ function PartBand({ part, index }: { part: Part; index: number }) {
                           </span>
                           {article.status === 'published' ? (
                             <Link
-                              href={`/${article.slug}`}
+                              href={`${basePath}/${article.slug}`}
                               className="text-sm text-link hover:text-link-hover transition-colors group inline-flex items-baseline gap-2"
                             >
                               <span className="border-b border-transparent group-hover:border-link-hover transition-colors">

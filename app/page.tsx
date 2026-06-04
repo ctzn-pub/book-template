@@ -1,12 +1,12 @@
-import { BookHome } from '@/components/Book/BookHome';
-import { book } from '@/lib/book-toc';
+import type { Metadata } from 'next';
+import { FormatLanding } from '@/components/FormatLanding';
+
+export const metadata: Metadata = {
+  title: 'ctzn.pub book-template — layout formats',
+  description:
+    'A multi-format publishing starter: a sequential book, a gallery of independent articles, and a docs-style sidebar layout. Five switchable themes.',
+};
 
 export default function HomePage() {
-  return (
-    <BookHome
-      book={book}
-      kicker="A one-line description of your book — what it argues, and from what evidence."
-      attribution="Built with the ctzn.pub book-template. Replace this line with your byline, license, or data sources."
-    />
-  );
+  return <FormatLanding />;
 }

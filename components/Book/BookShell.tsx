@@ -8,6 +8,13 @@ export interface BookShellProps {
   slug: string;
   book: Book;
   findArticle: (slug: string) => ArticleLookup;
+  /**
+   * Route prefix the book lives under. Articles resolve to
+   * `${basePath}/${slug}` and the book title links to `basePath`. Defaults
+   * to '/book' (the book demo lives at /book in this multi-format template);
+   * set '' if your book is mounted at the site root.
+   */
+  basePath?: string;
   children: React.ReactNode;
 }
 
@@ -15,7 +22,7 @@ function formatArticleNumber(num: string): string {
   return num.includes('.') ? `§${num}` : `Ch. ${num}`;
 }
 
-export function BookShell({ slug, book, findArticle, children }: BookShellProps) {
+export function BookShell({ slug, book, findArticle, basePath = '/book', children }: BookShellProps) {
   const found = findArticle(slug);
   if (!found) {
     throw new Error(`BookShell: no article found for slug "${slug}"`);
@@ -29,10 +36,10 @@ export function BookShell({ slug, book, findArticle, children }: BookShellProps)
 
   return (
     <div className="bg-surface text-body min-h-screen flex flex-col">
-      <StickyBookBar title={book.title} subtitle={book.subtitle} />
+      <StickyBookBar title={book.title} subtitle={book.subtitle} basePath={basePath} />
 
       <nav className="mx-auto max-w-3xl w-full px-6 pt-8 text-sm text-muted">
-        <Link href="/" className="hover:text-link">
+        <Link href={basePath || '/'} className="hover:text-link">
           {book.title}
         </Link>
         {part && (
@@ -64,9 +71,9 @@ export function BookShell({ slug, book, findArticle, children }: BookShellProps)
       {/* mt-auto pushes the prev/next nav to the bottom of the viewport
           on short articles, while still flowing naturally below the
           content on long ones. */}
-      <BookFooter prev={prev} next={next} />
+      <BookFooter prev={prev} next={next} basePath={basePath} />
 
-      <ChapterTocDrawer book={book} currentSlug={slug} />
+      <ChapterTocDrawer book={book} currentSlug={slug} basePath={basePath} />
     </div>
   );
 }
@@ -77,12 +84,12 @@ export function BookShell({ slug, book, findArticle, children }: BookShellProps)
  * site header auto-hides on scroll-down, this bar slides up to the top edge
  * and remains visible — so readers always know which book they're in.
  */
-function StickyBookBar({ title, subtitle }: { title: string; subtitle: string }) {
+function StickyBookBar({ title, subtitle, basePath }: { title: string; subtitle: string; basePath: string }) {
   return (
     <div className="sticky top-0 z-30 border-b border-border bg-surface/95 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-12 py-2.5">
         <Link
-          href="/"
+          href={basePath || '/'}
           className="text-sm font-display font-semibold text-body hover:text-link transition-colors"
         >
           {title}
@@ -96,14 +103,14 @@ function StickyBookBar({ title, subtitle }: { title: string; subtitle: string })
   );
 }
 
-function BookFooter({ prev, next }: { prev: Article | null; next: Article | null }) {
+function BookFooter({ prev, next, basePath }: { prev: Article | null; next: Article | null; basePath: string }) {
   return (
     <footer className="mt-auto border-t border-border bg-card">
       <nav className="mx-auto flex max-w-3xl items-stretch gap-4 px-6 py-8">
         <div className="flex-1">
           {prev && (
             <Link
-              href={`/${prev.slug}`}
+              href={`${basePath}/${prev.slug}`}
               className="block rounded-md border border-border p-4 hover:border-border-strong transition-colors"
             >
               <p className="text-xs uppercase tracking-wider text-muted">
@@ -118,7 +125,7 @@ function BookFooter({ prev, next }: { prev: Article | null; next: Article | null
         <div className="flex-1">
           {next && (
             <Link
-              href={`/${next.slug}`}
+              href={`${basePath}/${next.slug}`}
               className="block rounded-md border border-border p-4 text-right hover:border-border-strong transition-colors"
             >
               <p className="text-xs uppercase tracking-wider text-muted">
