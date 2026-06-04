@@ -24,10 +24,10 @@ export interface KeyNumberProps {
 
 function changeColor(change: string): string {
   const trimmed = change.trim();
-  if (trimmed.startsWith('+')) return 'text-green-700 bg-green-50';
+  if (trimmed.startsWith('+')) return 'text-green-700 bg-green-500/10';
   if (trimmed.startsWith('-') || trimmed.startsWith('−'))
-    return 'text-red-700 bg-red-50';
-  return 'text-gray-700 bg-gray-100';
+    return 'text-red-700 bg-red-500/10';
+  return 'text-subtle bg-code-bg';
 }
 
 /**

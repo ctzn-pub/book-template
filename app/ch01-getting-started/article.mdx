@@ -1,0 +1,203 @@
+import { DropCap } from '@/components/Book/DropCap';
+import { KeyNumber } from '@/components/Book/KeyNumber';
+import { Callout } from '@/components/Book/Callout';
+import { Figure } from '@/components/Book/Figure';
+import { TabSet, Tab } from '@/components/Book/TabSet';
+import { Quote } from '@/components/Book/Quote';
+import { PullQuote } from '@/components/Book/PullQuote';
+import { Annotation } from '@/components/Book/Annotation';
+import { SideNote } from '@/components/Book/SideNote';
+import { Step } from '@/components/Book/Step';
+import { SectionDivider } from '@/components/Book/SectionDivider';
+import { DataTable, DeltaCell } from '@/components/Book/DataTable';
+import { SmallMultiples, SmallMultiplesLegendItem } from '@/components/Book/SmallMultiples';
+import TimeseriesLineV1 from '@/components/Book/charts/timeseries-line-v1';
+
+import byGroup from './data/example-by-group.json';
+import topline from './data/example-topline.json';
+
+<DropCap>
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. This is the starter chapter for the **ctzn.pub book-template**. Every block below is a real component you can copy into your own chapters — read it once as a tour, then delete it and start writing. The drop cap you are reading now is the `<DropCap>` component: wrap the first paragraph of a chapter in it and the first letter is set large, the way a printed book opens. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua, ut enim ad minim veniam, quis nostrud exercitation.
+
+</DropCap>
+
+The body text outside any component is just Markdown — write normally. Paragraphs, **bold**, *italic*, `inline code`, [links](https://ctzn.pub), lists, and headings all render with the active theme's typography. Use the **Theme** button in the top bar to switch between Editorial, Times, FT, Economist, and Bloomberg; the prose, the chrome, and the charts all re-tone together.
+
+<KeyNumber
+  value="42"
+  unit="%"
+  label="The <KeyNumber> component — one large, weighted figure with a caption. Use it once near the top of a chapter for the single number the chapter is built around."
+  change="+12 since 2000"
+  align="center"
+/>
+
+## Headings mark sections
+
+A level-two heading (`##`) starts a section; the table-of-contents drawer (the floating **Contents** pill, bottom-right) and the heading rhythm both key off these. Keep them short. Use a level-three heading (`###`) for a subsection inside a section.
+
+Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu nibh euismod gravida.
+
+<Callout variant="finding">
+The `<Callout variant="finding">` block is for the one-sentence punchline of a section — the thing you want a skimming reader to take away. Use at most one per section, or it stops reading as emphasis.
+</Callout>
+
+### Callouts come in four variants
+
+<Callout variant="caveat">
+`variant="caveat"` (amber) is for a methodological warning — a survey mode change, a small subgroup, a definitional caveat. This is where you hedge a claim honestly.
+</Callout>
+
+<Callout variant="definition" title="Lorem ipsum">
+`variant="definition"` defines a term you use throughout the chapter. Pass a `title` to label it; omit the title and it reads as a plain bordered note.
+</Callout>
+
+<Callout variant="aside">
+`variant="aside"` has no card — just a quiet left rule and italic text. Use it for a conversational digression that would break the flow if left inline.
+</Callout>
+
+## Figures and charts
+
+Wrap every chart, image, or table-as-figure in `<Figure>`. It supplies the caption, the numbering convention, and the responsive width. The caption should state a *finding*, not describe the chart ("Support fell 30 points" — not "A chart of support over time").
+
+<Figure
+  caption="Figure 1. A multi-series time trend rendered by <TimeseriesLineV1> with placeholder data. The series carry no real meaning — Group A rises, Group B falls, Group C holds flat — they exist to show the chart. Click a legend item to toggle a series; flip the “Show 95% CI” switch for error bars."
+>
+  <div className="not-prose">
+    <TimeseriesLineV1
+      data={byGroup}
+      demographicGroups={['Group A', 'Group B', 'Group C']}
+      demographic="Series"
+      defaultVisibleGroups={['Group A', 'Group B']}
+      density="medium"
+    />
+  </div>
+</Figure>
+
+A few things worth knowing about the chart wrapper. The `density` prop controls height: `"comfortable"` for a hero chart, `"medium"` for an inline figure like the one above, `"compact"` for small-multiples panels. The chart reads its colors from the active theme — political group names (Democrat/Republican, Liberal/Conservative) get the theme's party colors automatically; everything else takes a neutral slot.
+
+<Figure width="page-outset"
+  caption="Figure 2. The same component at width='page-outset' and density='comfortable', showing a single topline series. Wider figures break out past the prose column for charts that need horizontal room."
+>
+  <div className="not-prose">
+    <TimeseriesLineV1
+      data={topline}
+      demographicGroups={['Overall']}
+      demographic="Overall"
+      defaultVisibleGroups={['Overall']}
+      density="comfortable"
+    />
+  </div>
+</Figure>
+
+<SideNote label="Figure widths">
+`<Figure>` takes a `width` prop: `body` (default, matches the text column), `body-outset` (a little wider), `page-outset` (wider still, for hero/comparison charts), and `screen-inset` (near-full-bleed, for punctuation moments). `<SideNote>` itself is this component — a small labelled note set off from the body.
+</SideNote>
+
+### Small multiples
+
+When you want to compare the same chart across several slices, `<SmallMultiples>` lays out a grid of `compact` charts with one shared legend, title, and source line.
+
+<Figure width="page-outset"
+  caption="Figure 3. <SmallMultiples> — a grid of compact panels sharing one legend and y-axis. Here the same two placeholder series are repeated; in a real chapter each panel would be a different slice (region, cohort, subgroup)."
+>
+  <SmallMultiples
+    columns={3}
+    subtitle="Each panel shares the same y-axis so heights are comparable."
+    source="Example data source (placeholder)"
+    sharedY={[0, 100]}
+    labels={['Panel one', 'Panel two', 'Panel three']}
+    legend={
+      <>
+        <SmallMultiplesLegendItem color="#2563EB" label="Group A" />
+        <SmallMultiplesLegendItem color="#DC2626" label="Group B" />
+      </>
+    }
+  >
+    <TimeseriesLineV1 data={byGroup} demographicGroups={['Group A', 'Group B']} demographic="Series" defaultVisibleGroups={['Group A', 'Group B']} compact />
+    <TimeseriesLineV1 data={byGroup} demographicGroups={['Group A', 'Group B']} demographic="Series" defaultVisibleGroups={['Group A', 'Group B']} compact />
+    <TimeseriesLineV1 data={byGroup} demographicGroups={['Group A', 'Group B']} demographic="Series" defaultVisibleGroups={['Group A', 'Group B']} compact />
+  </SmallMultiples>
+</Figure>
+
+## Tables
+
+For 3–8 rows where the *pattern across rows* is the point, use `<DataTable>` instead of a chart. Tabular numerals keep the columns aligned; `<DeltaCell>` formats a signed change with meaningful color.
+
+<Figure
+  caption="Table 1. <DataTable> with a <DeltaCell> column. Placeholder rows — replace with your own."
+>
+  <DataTable
+    caption="Example values for three groups, start vs. end, with the change."
+    highlightRow={1}
+    columns={[
+      { key: 'group', label: 'Group' },
+      { key: 'start', label: '1976', align: 'right' },
+      { key: 'end', label: '2024', align: 'right' },
+      { key: 'delta', label: 'Change', align: 'right' },
+    ]}
+    rows={[
+      { group: 'Group A', start: 30, end: 75, delta: <DeltaCell value={45} suffix=" pts" /> },
+      { group: 'Group B', start: 55, end: 30, delta: <DeltaCell value={-25} suffix=" pts" /> },
+      { group: 'Group C', start: 40, end: 41, delta: <DeltaCell value={1} suffix=" pts" /> },
+    ]}
+  />
+</Figure>
+
+<SectionDivider />
+
+## Quotes and emphasis
+
+A `<PullQuote>` lifts a sentence out of the flow at large size — the editorial pull quote.
+
+<PullQuote>
+The template gives you the layout vocabulary of a printed book; the prose is yours to write.
+</PullQuote>
+
+A `<Quote>` is for quoting a source, with attribution:
+
+<Quote author="A. Writer" work="On Writing Well" year={1976}>
+Lorem ipsum dolor sit amet — a quotation from someone else, set off from the body with its citation underneath.
+</Quote>
+
+You can also annotate a specific phrase inline: hover the <Annotation note="This is an <Annotation> — a marginal note attached to a specific word or phrase, revealed on hover or focus.">highlighted phrase</Annotation> in this sentence to see the note attached to it.
+
+<SectionDivider ornament="§" />
+
+## Tabbed content and steps
+
+`<TabSet>` lets the reader switch between alternate views of the same point — a chart vs. its data, or two framings of an argument.
+
+<TabSet>
+  <Tab label="What it shows">
+    Tabs are good for offering an optional deeper view without forcing it on every reader. Keep the default (first) tab the one most readers should see.
+  </Tab>
+  <Tab label="How to use it">
+    Wrap two or more `<Tab label="…">` children in a `<TabSet>`. Each tab's children can be prose, a chart, a table — anything.
+  </Tab>
+  <Tab label="A third tab">
+    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+  </Tab>
+</TabSet>
+
+When you need to walk the reader through a sequence — how to read a chart, the steps of a method — use `<Step>`:
+
+<Step number={1} title="First, set up the structure">
+Edit `lib/book-toc.ts` to define your parts, chapters, and articles. The TOC drives navigation and the home page.
+</Step>
+
+<Step number={2} title="Then, write a chapter">
+Create `app/<slug>/page.tsx` and `app/<slug>/article.mdx`, mark the article `published` in the TOC, and write. Copy this file as a starting point.
+</Step>
+
+<Step number={3} title="Add charts as you go">
+Drop chart JSON under `app/<slug>/data/`, import it, and wrap the chart in a `<Figure>`. Pull more chart components from the ontopic-viz-components registry when you outgrow the bundled ones.
+</Step>
+
+## That's the whole vocabulary
+
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Everything above is in this one file — open `app/ch01-getting-started/article.mdx` to see exactly how each block is written, then replace it with your book.
+
+<Callout variant="finding">
+Next step: open `lib/book-toc.ts`, change the title and structure, and start your first real chapter. Delete this one when you don't need the reference anymore.
+</Callout>

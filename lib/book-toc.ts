@@ -1,104 +1,60 @@
 import type { Article, Book } from '@/lib/book-types';
 
+/**
+ * The book's table of contents — the single source of truth for structure
+ * and navigation. Edit this to shape your book.
+ *
+ * Hierarchy: a Book has Parts; a Part has Chapters; a Chapter has Articles.
+ * For a simple book, one Part with several Chapters (one Article each) is
+ * plenty — Parts exist for longer works that group chapters into sections.
+ *
+ * Each Article needs:
+ *   - `slug`   the URL path AND the folder name under app/<slug>/.
+ *   - `number` shown in the UI ("Ch. 1", or "§1.2" for a sub-section).
+ *   - `title`  short title for nav and breadcrumbs.
+ *   - `status` 'published' renders the article; 'draft' / 'planned' show a
+ *              placeholder via the catch-all app/[slug] route (no folder
+ *              needed yet) — handy for sketching the whole TOC up front.
+ *
+ * The starter ships ONE worked chapter (`ch01-getting-started`) that shows
+ * every layout component, plus two planned stubs so you can see how the
+ * status system and the placeholder route behave. Replace all of it.
+ */
 export const book: Book = {
-  title: 'The Great Sorting',
-  subtitle: 'Political division in America, 1972–2024',
+  title: 'Your Book Title',
+  subtitle: 'A short, evocative subtitle that says what the book is about',
   parts: [
     {
       numeral: 'I',
-      title: 'Foundations & Methodology',
+      title: 'Part One',
       chapters: [
         {
           number: 1,
-          title: 'Introduction & Methodological Framework',
+          title: 'Getting Started: A Tour of the Components',
           articles: [
-            { slug: 'ch01-introduction', number: '1', title: 'Introduction & Methodological Framework', status: 'published' },
+            { slug: 'ch01-getting-started', number: '1', title: 'Getting Started', status: 'published' },
+          ],
+        },
+        {
+          number: 2,
+          title: 'Your Second Chapter',
+          articles: [
+            { slug: 'ch02-second-chapter', number: '2', title: 'Your Second Chapter', status: 'planned' },
           ],
         },
       ],
     },
     {
       numeral: 'II',
-      title: 'Mapping the Divide — Core Political Attitudes',
+      title: 'Part Two',
       chapters: [
-        {
-          number: 2,
-          title: 'Institutional Confidence — The Erosion of Trust',
-          articles: [
-            { slug: 'ch02-government-institutions', number: '2.2', title: 'Government Institutions: The Partisan Flip', status: 'published' },
-            { slug: 'ch02-knowledge-institutions', number: '2.3', title: 'Knowledge & Expertise Institutions: The Education Divide', status: 'published' },
-            { slug: 'ch02-media', number: '2.4', title: 'Media & Information: The Credibility Chasm', status: 'published' },
-            { slug: 'ch02-economic-institutions', number: '2.5', title: 'Economic Institutions: Class & Party Intersect', status: 'published' },
-            { slug: 'ch02-social-cultural-institutions', number: '2.6', title: 'Social & Cultural Institutions', status: 'published' },
-          ],
-        },
         {
           number: 3,
-          title: 'The Spending Divide — Priorities & Government’s Role',
+          title: 'Your Third Chapter',
           articles: [
-            { slug: 'ch03-social-welfare', number: '3.2', title: 'The Social Welfare Domain: Care vs. Fairness', status: 'published' },
-            { slug: 'ch03-security-order', number: '3.3', title: 'Security & Order: Shared Priorities, Different Emphasis', status: 'planned' },
-            { slug: 'ch03-environment-infrastructure', number: '3.4', title: 'Environment & Infrastructure: Emerging Divides', status: 'planned' },
+            { slug: 'ch03-third-chapter', number: '3', title: 'Your Third Chapter', status: 'planned' },
           ],
         },
-        {
-          number: 4,
-          title: 'Social & Cultural Battlegrounds',
-          articles: [
-            { slug: 'ch04-abortion', number: '4.1', title: 'Abortion Rights — The Persistent Divide', status: 'planned' },
-            { slug: 'ch04-civil-liberties', number: '4.2', title: 'Civil Liberties — Free Speech in a Polarized Era', status: 'planned' },
-            { slug: 'ch04-sexual-morality', number: '4.3', title: 'Sexual Morality & Social Values', status: 'planned' },
-            { slug: 'ch04-racial-attitudes', number: '4.4', title: 'Racial Attitudes & Explanations for Inequality', status: 'planned' },
-          ],
-        },
-        {
-          number: 5,
-          title: 'Police, Authority & Social Order',
-          articles: [
-            { slug: 'ch05-police-authority', number: '5', title: 'Police, Authority & Social Order', status: 'planned' },
-          ],
-        },
-      ],
-    },
-    {
-      numeral: 'III',
-      title: 'Social Fabric & Lived Experience',
-      chapters: [
-        { number: 6, title: 'Social Trust — The Foundational Divide', articles: [{ slug: 'ch06-social-trust', number: '6', title: 'Social Trust — The Foundational Divide', status: 'published' }] },
-        {
-          number: 7,
-          title: 'Life Satisfaction & Subjective Well-Being',
-          articles: [
-            { slug: 'ch07-life-satisfaction', number: '7.1', title: 'Life Satisfaction & Subjective Well-Being', status: 'planned' },
-            { slug: 'ch07-anxious-liberal', number: '7.2', title: 'The Anxious Liberal — Ideology, Age & Well-Being', status: 'published' },
-          ],
-        },
-      ],
-    },
-    {
-      numeral: 'IV',
-      title: 'The Demographic Foundations of Divide',
-      chapters: [
-        { number: 8, title: 'The Educational Realignment', articles: [{ slug: 'ch08-educational-realignment', number: '8', title: 'The Educational Realignment', status: 'planned' }] },
-        { number: 9, title: 'Gender & Political Identity', articles: [{ slug: 'ch09-gender', number: '9', title: 'Gender & Political Identity', status: 'planned' }] },
-        { number: 10, title: 'The White Voter — Majority Dynamics', articles: [{ slug: 'ch10-white-voter', number: '10', title: 'The White Voter — Majority Dynamics', status: 'planned' }] },
-      ],
-    },
-    {
-      numeral: 'V',
-      title: 'Temporal Dynamics & Synthesis',
-      chapters: [
-        { number: 11, title: 'The Long View — Five Decades of Change', articles: [{ slug: 'ch11-long-view', number: '11', title: 'The Long View — Five Decades of Change', status: 'planned' }] },
-        { number: 12, title: 'The Great Sorting — Political Identity & Ideological Alignment', articles: [{ slug: 'ch12-great-sorting', number: '12', title: 'The Great Sorting', status: 'planned' }] },
-        { number: 13, title: 'Issue Sorting, Geographic Patterns & Multi-Dimensional Divides', articles: [{ slug: 'ch13-issue-sorting', number: '13', title: 'Issue Sorting & Geography', status: 'planned' }] },
-        { number: 14, title: 'The Multidimensional Divide — Beyond Left vs. Right', articles: [{ slug: 'ch14-multidimensional', number: '14', title: 'The Multidimensional Divide', status: 'planned' }] },
-      ],
-    },
-    {
-      numeral: 'VI',
-      title: 'Conclusions & Implications',
-      chapters: [
-        { number: 15, title: 'The State of American Division — Findings & Future', articles: [{ slug: 'ch15-conclusions', number: '15', title: 'The State of American Division', status: 'planned' }] },
       ],
     },
   ],

@@ -1,6 +1,58 @@
+/* ─── Theme source of truth ──────────────────────────────────────────────
+ * The whole book — page chrome, prose typography, AND charts — is themed by
+ * ONE attribute: `data-viz-theme` on <html> (set by ThemeProvider). That
+ * attribute switches the `--viz-*` custom properties, which this file then
+ * re-exposes as the book's `--color-*` / font tokens. So a single switch
+ * re-tones everything, with no duplicated palettes.
+ *
+ *   viz/theme/viz-theme.css   generated `--viz-*` blocks, one per theme
+ *        ↓ (var() references below)
+ *   --color-* / --font-*      what BookShell, prose, and components read
+ *        ↓ (tailwind-preset + classes)
+ *   bg-surface, text-body, font-display, prose, …
+ *
+ * To add or retune a theme, edit viz/theme/{tokens,themes}.ts and run
+ * `pnpm theme:css` — never hand-edit viz-theme.css or the values here.
+ *
+ * NOTE: @import must be the very first statement (CSS spec), before the
+ * @tailwind directives below.
+ */
+@import "../viz/theme/viz-theme.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  /* Article + chrome tokens, derived from the active chart theme so they can
+   * never drift from the charts. `--viz-*` comes from viz-theme.css (defaults
+   * to the `editorial` :root block; overridden per `[data-viz-theme="…"]`). */
+  --color-body: var(--viz-fg);
+  --color-muted: var(--viz-muted);
+  /* "subtle" = between body and muted; mix keeps it tonally correct per theme. */
+  --color-subtle: color-mix(in srgb, var(--viz-fg) 70%, var(--viz-muted));
+  --color-surface: var(--viz-surface);
+  /* a card sits just off the page surface — tint toward the ink a hair. */
+  --color-card: color-mix(in srgb, var(--viz-surface) 96%, var(--viz-fg));
+  --color-card-hover: color-mix(in srgb, var(--viz-surface) 92%, var(--viz-fg));
+  --color-border: var(--viz-border);
+  --color-border-strong: color-mix(in srgb, var(--viz-border) 60%, var(--viz-fg));
+  --color-link: var(--viz-accent);
+  --color-link-hover: color-mix(in srgb, var(--viz-accent) 80%, var(--viz-fg));
+  --color-code-bg: color-mix(in srgb, var(--viz-surface) 92%, var(--viz-fg));
+  --color-subtle-bg: color-mix(in srgb, var(--viz-surface) 95%, var(--viz-fg));
+
+  /* Fonts also follow the theme (serif headings under Times/FT, etc.). The
+   * next/font variables (--font-inter / --font-space-grotesk) are the actual
+   * loaded webfonts; the theme picks which family stack to prefer. */
+  --font-book-sans: var(--viz-font-body, var(--font-inter));
+  --font-book-display: var(--viz-font-title, var(--font-space-grotesk));
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --leading-prose: 1.7;
+}
 
 html {
   scroll-behavior: smooth;
@@ -8,25 +60,27 @@ html {
 
 /* One-time soft pulse on the floating Contents pill to draw the eye on
    first article load. After 2 cycles it stops, so it doesn't become
-   visual noise during reading. */
+   visual noise during reading. Tinted with the theme accent. */
 @keyframes book-toc-pill-pulse {
-  0%, 100% { box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.30), 0 8px 10px -6px rgba(14, 165, 233, 0.30); }
-  50% { box-shadow: 0 25px 35px -5px rgba(14, 165, 233, 0.55), 0 12px 16px -6px rgba(14, 165, 233, 0.45); }
+  0%, 100% { box-shadow: 0 20px 25px -5px color-mix(in srgb, var(--viz-accent) 30%, transparent), 0 8px 10px -6px color-mix(in srgb, var(--viz-accent) 30%, transparent); }
+  50% { box-shadow: 0 25px 35px -5px color-mix(in srgb, var(--viz-accent) 55%, transparent), 0 12px 16px -6px color-mix(in srgb, var(--viz-accent) 45%, transparent); }
 }
 .book-toc-pill-pulse {
   animation: book-toc-pill-pulse 2.4s ease-in-out 1.2s 2;
 }
 
 body {
-  background-color: #FFFFFF;
-  color: #1A1A1A;
+  background-color: var(--color-surface);
+  color: var(--color-body);
   font-feature-settings: "ss01", "ss02", "cv01", "cv02";
   -webkit-font-smoothing: antialiased;
+  /* Smooth the cross-fade when the reader switches themes. */
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Focus visible styles for accessibility */
 *:focus-visible {
-  outline: 2px solid #0EA5E9;
+  outline: 2px solid var(--color-link);
   outline-offset: 2px;
 }
 
@@ -37,19 +91,20 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #F8F9FA;
+  background: var(--color-subtle-bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #DEE2E6;
+  background: var(--color-border);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #0EA5E9;
+  background: var(--color-link);
 }
 
-/* Syntax highlighting - light theme */
+/* Syntax highlighting — tied to the theme accent + ink so code blocks read in
+   every theme (including the Bloomberg dark surface). */
 .hljs {
   background: transparent !important;
 }
@@ -61,7 +116,7 @@ body {
 .hljs-doctag,
 .hljs-name,
 .hljs-strong {
-  color: #0369A1; /* darker blue */
+  color: var(--color-link);
 }
 
 .hljs-string,
@@ -71,11 +126,11 @@ body {
 .hljs-template-variable,
 .hljs-type,
 .hljs-variable.language_ {
-  color: #C2410C; /* darker orange */
+  color: color-mix(in srgb, var(--color-link) 60%, var(--color-body));
 }
 
 .hljs-comment {
-  color: #6C757D; /* brand-muted */
+  color: var(--color-muted);
 }
 
 .hljs-attr,
@@ -88,13 +143,7 @@ body {
 .hljs-selector-attr,
 .hljs-selector-class,
 .hljs-selector-id {
-  color: #047857; /* darker emerald */
-}
-
-.hljs-regexp,
-.hljs-meta .hljs-string,
-.hljs-link {
-  color: #7C3AED; /* darker purple */
+  color: var(--color-subtle);
 }
 
 .hljs-built_in,
@@ -102,32 +151,24 @@ body {
 .hljs-code,
 .hljs-params,
 .hljs-property {
-  color: #1A1A1A; /* brand-text */
-}
-
-.hljs-bullet,
-.hljs-deletion {
-  color: #C2410C;
-}
-
-.hljs-addition {
-  color: #047857;
+  color: var(--color-body);
 }
 
 /* Line numbers in code blocks */
 .hljs-ln-numbers {
-  color: #6C757D;
+  color: var(--color-muted);
   padding-right: 1rem;
   user-select: none;
 }
 
-/* Prose styles for markdown */
+/* Prose styles for markdown — kept as an explicit class for any opt-in use.
+   The Tailwind preset already maps `prose`'s palette to the same tokens. */
 .prose-brand {
-  --tw-prose-body: #495057;
-  --tw-prose-headings: #1A1A1A;
-  --tw-prose-links: #0EA5E9;
-  --tw-prose-bold: #1A1A1A;
-  --tw-prose-code: #0EA5E9;
-  --tw-prose-quotes: #6C757D;
-  --tw-prose-quote-borders: #0EA5E9;
+  --tw-prose-body: var(--color-subtle);
+  --tw-prose-headings: var(--color-body);
+  --tw-prose-links: var(--color-link);
+  --tw-prose-bold: var(--color-body);
+  --tw-prose-code: var(--color-link);
+  --tw-prose-quotes: var(--color-muted);
+  --tw-prose-quote-borders: var(--color-link);
 }
