@@ -14,6 +14,9 @@ export const THEME_LABELS: Record<ThemeName, string> = {
   ft: 'FT',
   economist: 'Economist',
   bloomberg: 'Bloomberg',
+  slate: 'Slate (dark)',
+  brutalist: 'Brutalist',
+  academic: 'Academic',
 };
 
 /** Theme names in display order, derived from the registry (never hand-listed). */

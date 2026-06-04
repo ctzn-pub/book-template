@@ -69,3 +69,33 @@
   --viz-font-body: "Helvetica Neue", Inter, system-ui, sans-serif;
   --viz-font-title: "Helvetica Neue", Inter, system-ui, sans-serif;
 }
+[data-viz-theme="slate"] {
+  --viz-fg: #e6edf3;
+  --viz-muted: #8b949e;
+  --viz-grid: #262c36;
+  --viz-surface: #0e1116;
+  --viz-border: #262c36;
+  --viz-accent: #58a6ff;
+  --viz-font-body: Geist, system-ui, sans-serif;
+  --viz-font-title: Geist, system-ui, sans-serif;
+}
+[data-viz-theme="brutalist"] {
+  --viz-fg: #000000;
+  --viz-muted: #444444;
+  --viz-grid: #000000;
+  --viz-surface: #ffffff;
+  --viz-border: #000000;
+  --viz-accent: #1a1aff;
+  --viz-font-body: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --viz-font-title: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+[data-viz-theme="academic"] {
+  --viz-fg: #1f1b16;
+  --viz-muted: #6b645a;
+  --viz-grid: #e4ded3;
+  --viz-surface: #fbfaf7;
+  --viz-border: #e4ded3;
+  --viz-accent: #7a1f1f;
+  --viz-font-body: Georgia, "Source Serif Pro", "Times New Roman", serif;
+  --viz-font-title: Georgia, "Source Serif Pro", "Times New Roman", serif;
+}

@@ -3,11 +3,10 @@ import Link from 'next/link';
 import { ThemeSwitcher } from '@/components/Book/ThemeSwitcher';
 
 /**
- * The template's front door. This repo ships more than one *layout format* —
- * a sequential Book, a flat Gallery of independent articles, and (planned) a
- * docs-style sidebar layout. This page lets a visitor jump to a live demo of
- * each, and reminds the author that they pick ONE format for their own site
- * (then delete this landing page and the formats they don't use).
+ * The template's front door. This repo ships several *layout formats* — Book,
+ * Gallery, Docs, Magazine, Dashboard, and Slides. This page lets a visitor jump
+ * to a live demo of each, and reminds the author that they pick ONE format for
+ * their own site (then delete this landing page and the formats they don't use).
  *
  * Everything here is theme-aware via the design tokens, so the format picker
  * re-tones with the rest of the template.
@@ -50,6 +49,33 @@ const FORMATS: Format[] = [
     bullets: ['Always-open left sidebar', 'Reference reading model', 'Collapsible on mobile'],
     status: 'live',
   },
+  {
+    href: '/magazine',
+    eyebrow: 'Format 04',
+    title: 'Magazine',
+    blurb:
+      'A single immersive feature. Full-bleed hero, oversized standfirst and pull-quotes, asymmetric figures that break past the text column. One long read, not a book.',
+    bullets: ['Full-bleed cover', 'Oversized pull-quotes', 'Asymmetric figures'],
+    status: 'live',
+  },
+  {
+    href: '/dashboard',
+    eyebrow: 'Format 05',
+    title: 'Dashboard',
+    blurb:
+      'A single-page data report. A row of KPI stat cards over a grid of chart and section panels — everything on one screen. For reports rather than prose.',
+    bullets: ['KPI stat cards', 'Chart-panel grid', 'One-page report'],
+    status: 'live',
+  },
+  {
+    href: '/slides',
+    eyebrow: 'Format 06',
+    title: 'Slides',
+    blurb:
+      'MDX as a presentation. Full-viewport sections you advance with the arrow keys, the scroll wheel, or on-screen controls, with a dot rail and a progress bar.',
+    bullets: ['Full-viewport sections', 'Keyboard + scroll nav', 'Progress indicator'],
+    status: 'live',
+  },
 ];
 
 export function FormatLanding() {
@@ -70,9 +96,9 @@ export function FormatLanding() {
           One template, several ways to publish.
         </h1>
         <p className="mt-5 max-w-2xl text-lg leading-relaxed text-subtle">
-          Pick the layout that fits your content — a sequential book, a gallery of
-          independent pieces, or a docs-style sidebar. Each is a live demo below.
-          They share the same components, typography, and five switchable themes
+          Pick the layout that fits your content — a book, a gallery, docs, a
+          magazine feature, a dashboard, or slides. Each is a live demo below.
+          They share the same components, typography, and eight switchable themes
           (try the <span className="font-medium text-body">Theme</span> button,
           top-right).
         </p>

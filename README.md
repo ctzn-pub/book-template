@@ -1,12 +1,12 @@
 # book-template
 
 A Next.js boilerplate for publishing data-driven MDX writing online, in more
-than one **layout format**, with **five switchable visual themes**. Built from
+than one **layout format**, with **eight switchable visual themes**. Built from
 MDX and embedded Recharts figures, with Distill-style typography and a library
 of editorial layout components (drop caps, callouts, key numbers, side notes,
 pull quotes, small multiples, tab sets, data tables, embeds).
 
-It ships **three worked layouts** you can demo side by side, plus a landing page
+It ships **six worked layouts** you can demo side by side, plus a landing page
 that links to each:
 
 | Format | Route | For |
@@ -14,12 +14,15 @@ that links to each:
 | **Book** | `/book` | A sequential, long-form work — parts → chapters → articles, an editorial cover, a chapter TOC drawer, prev/next reading flow. |
 | **Gallery** | `/gallery` | A collection of *independent* articles — a card-grid front page, each piece standalone, back-to-gallery navigation. No sequence. |
 | **Docs** | `/docs` | A reference layout — a persistent, always-open left-sidebar of sections and pages, collapsible to a drawer on mobile. The Fumadocs / Docusaurus model. |
+| **Magazine** | `/magazine` | A single immersive feature — full-bleed hero, oversized standfirst and pull-quotes, asymmetric figures. One long read, not a book. |
+| **Dashboard** | `/dashboard` | A single-page data report — a row of KPI stat cards over a grid of chart and section panels. For reports rather than prose. |
+| **Slides** | `/slides` | MDX as a presentation — full-viewport sections you advance with the arrow keys, scroll wheel, or on-screen controls, with a dot rail and progress bar. |
 
 Each ships worked, lorem-ipsum examples (the book's
 [`ch01-getting-started`](app/book/ch01-getting-started/article.mdx) tours every
-component; the gallery has two example pieces; the docs site has a few pages).
-Read them, then keep the one format you want, delete the rest, and make it your
-root route.
+component; the gallery and docs each have a few pages; magazine, dashboard, and
+slides each ship one placeholder demo). Read them, then keep the one format you
+want, delete the rest, and make it your root route.
 
 ## Quick start
 
@@ -42,8 +45,8 @@ pnpm start
 ## Visual themes
 
 The whole book — page chrome, prose typography, **and** the charts — is
-themed by a single attribute, `data-viz-theme`, on `<html>`. Five themes
-ship, modeled on real editorial-press systems:
+themed by a single attribute, `data-viz-theme`, on `<html>`. Eight themes
+ship:
 
 | Theme       | Look                                              |
 |-------------|---------------------------------------------------|
@@ -52,6 +55,9 @@ ship, modeled on real editorial-press systems:
 | `ft`        | Salmon-pink paper, serif heads, FT blue + claret. |
 | `economist` | Cool grey paper, bold sans, single-red emphasis.  |
 | `bloomberg` | Terminal amber on near-black. A **dark** theme.   |
+| `slate`     | Clean, neutral **dark** mode — off-white ink, calm blue accent. |
+| `brutalist` | Monospace everywhere, hard black rules, electric-blue accent. |
+| `academic`  | Warm paper, serif body **and** headings, deep-maroon accent. |
 
 The reader picks one with the `<ThemeSwitcher>` in the top bar; the choice
 persists to `localStorage` and is applied before first paint (no flash).
@@ -118,9 +124,15 @@ app/
     introduction/         Worked docs pages (page.tsx + article.mdx) …
     installation/         … rendered inside the persistent-sidebar shell.
     writing-pages/
+  magazine/            ── THE MAGAZINE FORMAT ──
+    page.tsx              One immersive feature: <MagazineShell> + article.mdx.
+  dashboard/           ── THE DASHBOARD FORMAT ──
+    page.tsx              KPI cards + chart-panel grid; data/ holds example JSON.
+  slides/              ── THE SLIDES FORMAT ──
+    page.tsx              An array of slides rendered by <SlidesShell>.
 components/
   MainArea.tsx          The <main> wrapper.
-  FormatLanding.tsx     The root "pick a layout" page (Book / Gallery / Docs).
+  FormatLanding.tsx     The root "pick a layout" page (links all six formats).
   Book/
     ThemeProvider.tsx   Owns the active theme (CSS attr + VizThemeProvider).
     ThemeSwitcher.tsx   The reader-facing theme picker.
@@ -141,6 +153,12 @@ components/
     GalleryShell.tsx    Gallery article frame (back-to-gallery, no prev/next).
   Docs/
     DocsShell.tsx       Docs frame — persistent left sidebar + content column.
+  Magazine/
+    MagazineShell.tsx   Full-bleed feature frame (hero + reading column).
+  Dashboard/
+    DashboardHome.tsx   KPI cards + grid; exports <DashboardCard> for panels.
+  Slides/
+    SlidesShell.tsx     Deck frame — scroll-snap sections + keyboard nav.
 lib/
   book-toc.ts           The book's TOC — parts, chapters, article order.
   book-types.ts         Book TS types (Book, Part, Chapter, Article).

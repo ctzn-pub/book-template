@@ -8,7 +8,8 @@ import typography from '@tailwindcss/typography';
  * below — there are no baked-in hex values here.
  */
 const config: Config = {
-  darkMode: ['class', '[data-viz-theme="bloomberg"]'],
+  // Both Bloomberg and Slate are dark themes — either triggers `dark:` utilities.
+  darkMode: ['class', '[data-viz-theme="bloomberg"], [data-viz-theme="slate"]'],
   content: [
     './app/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
